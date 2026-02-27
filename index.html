@@ -401,7 +401,7 @@ const G = {
   camX:WORLD/2, camY:WORLD*.82,
   time:0,
   isDragging:false, dragStartX:0, dragStartY:0, camStartX:0, camStartY:0,
-  zoom:1.0, minZoom:0.35, maxZoom:2.5,
+  zoom:1.0, minZoom:0.1, maxZoom:2.5,
   abilityActive:false, abilityCooldown:0, abilityMaxCooldown:600,
   lvlGold:0, lvlIslands:0, lvlShips:0,
   totalIslands:0, totalShips:0,
@@ -1198,7 +1198,7 @@ function showWin(){
 // ══════════════════════════════════════════
 // Zoom state
 G.zoom = 1.0;          // current zoom level
-G.minZoom = 0.4;       // zoom out max
+G.minZoom = 0.1;       // zoom out max
 G.maxZoom = 2.5;       // zoom in max
 let pinchStartDist = 0;
 let pinchStartZoom = 1;
