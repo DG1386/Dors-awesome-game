@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>⚓ שודדי הים</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&display=swap');
+:root{--gold:#f0c040;--gold2:#c8960a;--deep:#040c18;--red:#c0392b;--green:#2ecc71;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'IM Fell English',serif;color:var(--gold);}
+
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;padding:20px;gap:12px;}
+.screen.hidden{display:none!important;}
+
+/* INTRO */
+#screen-intro{background:radial-gradient(ellipse at 50% 60%,#1a0800,#000);}
+#screen-intro h1{font-family:'Pirata One',cursive;font-size:min(15vw,5rem);color:var(--gold);text-shadow:0 0 60px var(--gold2);text-align:center;line-height:1;animation:glow 2.5s ease-in-out infinite;}
+@keyframes glow{0%,100%{text-shadow:0 0 40px var(--gold2);}50%{text-shadow:0 0 90px var(--gold),0 0 150px rgba(240,192,64,.4);}}
+.intro-sub{color:var(--gold2);font-size:.82rem;letter-spacing:3px;text-transform:uppercase;text-align:center;}
+.big-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));border:3px solid var(--gold);color:#000;font-family:'Pirata One',cursive;font-size:1.6rem;padding:14px 44px;border-radius:12px;cursor:pointer;transition:transform .15s;}
+.big-btn:active{transform:scale(.95);}
+.intro-box{background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.2);border-radius:12px;padding:14px 18px;font-size:.75rem;color:var(--gold2);line-height:2;width:100%;max-width:340px;text-align:center;}
+
+/* BOSS INTRO SCREEN */
+#screen-boss-intro{background:radial-gradient(ellipse at center,#1a0000,#000);}
+#boss-intro-skull{font-size:5rem;animation:bossFloat 1.4s ease-in-out infinite;}
+@keyframes bossFloat{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-14px) rotate(5deg);}}
+#boss-intro-name{font-family:'Pirata One',cursive;font-size:2.2rem;color:#e74c3c;text-align:center;text-shadow:0 0 30px #c0392b,0 0 60px rgba(192,57,43,.4);animation:bossGlow 1s ease-in-out infinite;}
+@keyframes bossGlow{0%,100%{text-shadow:0 0 20px #c0392b;}50%{text-shadow:0 0 60px #e74c3c,0 0 100px rgba(231,76,60,.5);}}
+#boss-intro-desc{color:#ccc;font-size:.8rem;text-align:center;max-width:300px;line-height:1.8;}
+.boss-stat-row{display:flex;gap:8px;width:100%;max-width:320px;}
+.bstat{flex:1;background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.4);border-radius:8px;padding:8px;text-align:center;}
+.bstat .bv{font-size:1.1rem;color:#e74c3c;font-weight:700;}
+.bstat .bl{font-size:.55rem;color:#aaa;letter-spacing:2px;text-transform:uppercase;}
+.boss-warn-box{background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.35);border-radius:10px;padding:10px 16px;font-size:.72rem;color:#e74c3c;text-align:center;max-width:300px;line-height:1.8;}
+.red-btn{background:linear-gradient(135deg,#8B0000,#400000);border:3px solid #e74c3c;color:#fff;font-family:'Pirata One',cursive;font-size:1.5rem;padding:13px 42px;border-radius:12px;cursor:pointer;}
+.red-btn:active{transform:scale(.95);}
+
+/* LEVEL COMPLETE / GAME OVER / WIN */
+#screen-level{background:radial-gradient(ellipse at center,#0a1a06,#000);}
+#screen-gameover{background:radial-gradient(ellipse at center,#1a0000,#000);}
+#screen-win{background:radial-gradient(ellipse at center,#0a0a00,#000);}
+.sc-title{font-family:'Pirata One',cursive;font-size:2.4rem;text-align:center;}
+.sc-sub{color:#888;font-size:.78rem;letter-spacing:2px;text-transform:uppercase;text-align:center;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;max-width:320px;}
+.scard{background:rgba(240,192,64,.07);border:1px solid rgba(240,192,64,.22);border-radius:10px;padding:11px;text-align:center;}
+.scard .sv{font-size:1.5rem;color:var(--gold);font-weight:700;}
+.scard .sl{font-size:.56rem;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;}
+#lc-bonus{color:var(--gold2);font-size:.82rem;text-align:center;}
+
+/* GAME WRAP */
+#game-wrap{display:flex;flex-direction:column;height:100dvh;width:100vw;}
+#top-hud{flex-shrink:0;background:linear-gradient(180deg,rgba(4,12,24,.98),rgba(4,12,24,.8));border-bottom:1px solid rgba(240,192,64,.3);display:flex;align-items:center;gap:5px;padding:6px 8px;z-index:10;}
+.hpill{background:rgba(240,192,64,.07);border:1px solid rgba(240,192,64,.22);border-radius:14px;padding:4px 8px;text-align:center;flex:1;min-width:0;}
+.hpill .hl{font-size:.44rem;letter-spacing:1.5px;color:var(--gold2);text-transform:uppercase;display:block;}
+.hpill .hv{font-size:.82rem;color:var(--gold);font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hbar-w{background:rgba(255,255,255,.08);border-radius:3px;height:4px;margin-top:2px;overflow:hidden;}
+.hbar-f{height:100%;border-radius:3px;transition:width .3s,background .3s;}
+#level-badge{background:linear-gradient(135deg,var(--gold2),#8B5000);border:2px solid var(--gold);border-radius:18px;padding:4px 10px;font-family:'Pirata One',cursive;font-size:.9rem;color:#000;white-space:nowrap;flex-shrink:0;}
+
+/* BOSS HP BAR (in-game top) */
+#boss-hud{display:none;position:fixed;top:0;left:0;right:0;z-index:25;pointer-events:none;padding-top:env(safe-area-inset-top);}
+#boss-hud-inner{background:linear-gradient(90deg,rgba(80,0,0,.97),rgba(160,0,0,.97),rgba(80,0,0,.97));padding:7px 16px 8px;border-bottom:2px solid #e74c3c;}
+#boss-hud-name{font-family:'Pirata One',cursive;font-size:.95rem;color:#ff8080;text-align:center;letter-spacing:1px;}
+#boss-phase-tag{display:inline-block;background:#c0392b;color:#fff;font-size:.52rem;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border-radius:10px;margin-right:6px;vertical-align:middle;}
+#boss-hp-track{background:rgba(0,0,0,.5);border-radius:6px;height:12px;margin-top:5px;overflow:hidden;position:relative;}
+#boss-hp-fill{height:100%;background:linear-gradient(90deg,#8B0000,#e74c3c,#f39c12);border-radius:6px;transition:width .35s;width:100%;}
+#boss-hp-track::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent);border-radius:6px;pointer-events:none;}
+#boss-hp-info{display:flex;justify-content:space-between;margin-top:3px;}
+#boss-hp-info span{font-size:.55rem;color:#ffaaaa;}
+
+/* CANVAS */
+#main{flex:1;position:relative;overflow:hidden;min-height:0;}
+canvas{display:block;width:100%;height:100%;}
+#flash{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .08s;}
+#minimap{position:absolute;bottom:90px;left:8px;width:80px;height:80px;border:1px solid rgba(240,192,64,.4);border-radius:5px;background:rgba(4,12,24,.88);overflow:hidden;}
+#minimap canvas{width:100%;height:100%;display:block;}
+#mm-lbl{position:absolute;bottom:92px;left:8px;font-size:.47rem;color:rgba(240,192,64,.45);letter-spacing:1px;}
+#log{position:absolute;top:7px;left:8px;right:8px;pointer-events:none;text-align:center;z-index:5;}
+.log-entry{font-size:.7rem;color:var(--gold);background:rgba(4,12,24,.9);border-radius:12px;padding:4px 12px;display:inline-block;animation:fu .3s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+/* ABILITY BTN */
+#btn-ability{position:absolute;right:8px;bottom:92px;width:52px;height:52px;background:linear-gradient(135deg,#2a0080,#100040);border:2px solid #9b59b6;border-radius:50%;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-user-select:none;z-index:8;transition:all .15s;}
+#btn-ability:active{transform:scale(.9);}
+#btn-ability.cooldown{opacity:.35;pointer-events:none;}
+#ability-timer{position:absolute;right:8px;bottom:148px;font-size:.48rem;color:#9b59b6;text-align:center;width:52px;}
+
+/* BOTTOM */
+#bottom-area{flex-shrink:0;background:linear-gradient(0deg,rgba(4,12,24,.99),rgba(4,12,24,.85));border-top:1px solid rgba(240,192,64,.3);padding:7px 8px;padding-bottom:max(7px,env(safe-area-inset-bottom));}
+#action-row{display:flex;gap:6px;margin-bottom:6px;}
+.abtn{flex:1;border:2px solid var(--gold);color:#000;font-family:'Pirata One',cursive;font-size:.86rem;padding:10px 2px;border-radius:9px;cursor:pointer;text-align:center;line-height:1.2;background:linear-gradient(135deg,var(--gold2),#7B5000);-webkit-user-select:none;transition:transform .1s;}
+.abtn:active:not(:disabled){transform:scale(.93);}
+.abtn:disabled{opacity:.28;}
+.abtn.red{background:linear-gradient(135deg,#8B1010,#400808);border-color:var(--red);color:#fff;}
+.abtn.grn{background:linear-gradient(135deg,#0a4a18,#051e08);border-color:var(--green);color:var(--green);}
+.abtn.blue{background:linear-gradient(135deg,#0a1a6a,#060a30);border-color:#4a90e2;color:#4a90e2;}
+#bottom-row2{display:flex;gap:6px;}
+.sbtn{flex:1;background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.28);color:var(--gold2);font-family:'IM Fell English',serif;font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;padding:7px;border-radius:8px;cursor:pointer;text-align:center;-webkit-user-select:none;}
+.sbtn:active{background:rgba(240,192,64,.14);}
+
+/* UPGRADE PANEL */
+#upg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:none;}
+#upg-overlay.show{display:block;}
+#upg-panel{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(180deg,#0d0500,#060200);border-top:2px solid var(--gold2);border-radius:20px 20px 0 0;padding:14px 12px;padding-bottom:max(18px,env(safe-area-inset-bottom));z-index:60;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);max-height:84dvh;overflow-y:auto;}
+#upg-panel.open{transform:translateY(0);}
+.upg-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.upg-hdr h2{font-family:'Pirata One',cursive;font-size:1.2rem;color:var(--gold);}
+.ucls{background:rgba(240,192,64,.1);border:1px solid var(--gold2);color:var(--gold);font-size:1rem;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.gold-bar{background:rgba(240,192,64,.07);border:1px solid rgba(240,192,64,.2);border-radius:8px;padding:5px 12px;font-size:.78rem;text-align:center;margin-bottom:9px;}
+.usec{font-size:.56rem;letter-spacing:2.5px;color:var(--gold2);text-transform:uppercase;margin:7px 0 5px;border-bottom:1px solid rgba(240,192,64,.12);padding-bottom:3px;}
+.ugrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.ucard{background:linear-gradient(135deg,#1e0800,#0a0300);border:1px solid rgba(240,192,64,.28);border-radius:9px;padding:9px;cursor:pointer;position:relative;-webkit-user-select:none;transition:border-color .15s;}
+.ucard:active:not(.dis){transform:scale(.95);border-color:var(--gold);}
+.ucard.dis{opacity:.32;cursor:not-allowed;}
+.ulvl{position:absolute;top:5px;left:6px;background:var(--gold2);color:#000;font-size:.5rem;font-weight:700;padding:1px 5px;border-radius:3px;}
+.uname{display:block;font-size:.7rem;color:var(--gold);margin-bottom:2px;}
+.ucost{font-size:.6rem;color:var(--gold2);}
+.rfull{width:100%;margin-top:8px;background:linear-gradient(135deg,#0a3010,#051508);border:1px solid var(--green);color:var(--green);font-family:'IM Fell English',serif;font-size:.78rem;padding:9px;border-radius:9px;cursor:pointer;-webkit-user-select:none;}
+.rfull:disabled{opacity:.3;}
+</style>
+</head>
+<body>
+
+<!-- ══════════ INTRO ══════════ -->
+<div id="screen-intro" class="screen">
+  <h1>⚓<br>שודדי הים</h1>
+  <div class="intro-sub">10 שלבים · 4 בוסים אפיים · מפה ענקית</div>
+  <button class="big-btn" onclick="startGame()">⛵ הפלג!</button>
+  <div class="intro-box">
+    🗺️ <b>גרור</b> לנווט במפה<br>
+    🏝️ <b>גע על אי</b> לכבוש<br>
+    🚢 <b>גע על סירת אויב</b> לתקוף<br>
+    💜 <b>יכולת מיוחדת</b> — כפתור סגול<br>
+    ☠️ <b>כבוש הכל</b> → קרב בוס!
+  </div>
+</div>
+
+<!-- ══════════ BOSS INTRO ══════════ -->
+<div id="screen-boss-intro" class="screen hidden">
+  <div id="boss-intro-skull">☠️</div>
+  <div id="boss-intro-name">שם הבוס</div>
+  <div id="boss-intro-desc">תיאור הבוס</div>
+  <div class="boss-stat-row">
+    <div class="bstat"><div class="bv" id="boss-intro-hp">—</div><div class="bl">❤️ בריאות</div></div>
+    <div class="bstat"><div class="bv" id="boss-intro-phases">—</div><div class="bl">⚡ שלבים</div></div>
+    <div class="bstat"><div class="bv" id="boss-intro-loot">—</div><div class="bl">💰 פרס</div></div>
+  </div>
+  <div class="boss-warn-box" id="boss-intro-warn"></div>
+  <button class="red-btn" onclick="startBossFight()">⚔️ לקרב!</button>
+</div>
+
+<!-- ══════════ LEVEL COMPLETE ══════════ -->
+<div id="screen-level" class="screen hidden">
+  <div class="sc-title" style="color:var(--green)">🏆 שלב הושלם!</div>
+  <div class="sc-sub" id="lc-sub"></div>
+  <div class="stat-grid">
+    <div class="scard"><div class="sv" id="lc-gold">0</div><div class="sl">💰 זהב</div></div>
+    <div class="scard"><div class="sv" id="lc-isl">0</div><div class="sl">🏝️ איים</div></div>
+    <div class="scard"><div class="sv" id="lc-ships">0</div><div class="sl">🚢 הושמד</div></div>
+    <div class="scard"><div class="sv" id="lc-hp">0</div><div class="sl">❤️ בריאות</div></div>
+  </div>
+  <div id="lc-bonus"></div>
+  <button class="big-btn" onclick="nextLevel()">שלב הבא ⚔️</button>
+</div>
+
+<!-- ══════════ GAME OVER ══════════ -->
+<div id="screen-gameover" class="screen hidden">
+  <div class="sc-title" style="color:var(--red)">💀 הספינה טבעה!</div>
+  <div class="sc-sub">ירדת לתהום הגדול</div>
+  <div class="stat-grid">
+    <div class="scard"><div class="sv" id="go-isl">0</div><div class="sl">🏝️ איים</div></div>
+    <div class="scard"><div class="sv" id="go-lvl">1</div><div class="sl">⚓ שלב</div></div>
+    <div class="scard"><div class="sv" id="go-gold">0</div><div class="sl">💰 זהב</div></div>
+    <div class="scard"><div class="sv" id="go-ships">0</div><div class="sl">🚢 הושמד</div></div>
+  </div>
+  <button class="big-btn" style="background:linear-gradient(135deg,#a00,#600);border-color:var(--red);color:#fff" onclick="location.reload()">נסה שוב 🔄</button>
+</div>
+
+<!-- ══════════ WIN ══════════ -->
+<div id="screen-win" class="screen hidden">
+  <div class="sc-title" style="color:var(--gold);animation:glow 2s infinite">⚓ מלך הים! ⚓</div>
+  <div class="sc-sub">כבשת את כל 10 השלבים!</div>
+  <div class="stat-grid">
+    <div class="scard"><div class="sv" id="win-gold">0</div><div class="sl">💰 זהב</div></div>
+    <div class="scard"><div class="sv" id="win-isl">0</div><div class="sl">🏝️ איים</div></div>
+    <div class="scard"><div class="sv" id="win-ships">0</div><div class="sl">🚢 הושמד</div></div>
+    <div class="scard"><div class="sv" id="win-lvl">10</div><div class="sl">⚓ שלבים</div></div>
+  </div>
+  <button class="big-btn" onclick="location.reload()">שחק שוב 🔄</button>
+</div>
+
+<!-- ══════════ GAME ══════════ -->
+<div id="game-wrap">
+  <!-- BOSS HP BAR -->
+  <div id="boss-hud">
+    <div id="boss-hud-inner">
+      <div style="text-align:center">
+        <span id="boss-phase-tag">שלב 1</span>
+        <span id="boss-hud-name">בוס</span>
+      </div>
+      <div id="boss-hp-track"><div id="boss-hp-fill"></div></div>
+      <div id="boss-hp-info">
+        <span id="boss-hp-text"></span>
+        <span id="boss-phase-text"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="top-hud">
+    <div class="hpill">
+      <span class="hl">❤️ ספינה</span>
+      <span class="hv" id="stat-hp">100/100</span>
+      <div class="hbar-w"><div class="hbar-f" id="hp-bar" style="width:100%"></div></div>
+    </div>
+    <div id="level-badge">שלב 1</div>
+    <div class="hpill">
+      <span class="hl">💰 זהב</span>
+      <span class="hv" id="stat-gold">60</span>
+    </div>
+    <div class="hpill">
+      <span class="hl">🏝️ נותרו</span>
+      <span class="hv" id="stat-remain">?</span>
+    </div>
+    <div class="hpill">
+      <span class="hl">🚢 אויבים</span>
+      <span class="hv" id="stat-enemies">0</span>
+    </div>
+    <button id="btn-mute" onclick="toggleMute()" title="השתק" style="background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);color:var(--gold);font-size:1.05rem;width:34px;height:34px;border-radius:50%;cursor:pointer;flex-shrink:0;padding:0;">🔊</button>
+  </div>
+
+  <div id="main">
+    <canvas id="gameCanvas"></canvas>
+    <div id="flash"></div>
+    <div id="log"></div>
+    <div id="mm-lbl">מפה</div>
+    <div id="minimap"><canvas id="minimapCanvas"></canvas></div>
+    <div id="ability-timer"></div>
+    <button id="btn-ability" onclick="useAbility()" title="יכולת מיוחדת">💜</button>
+  </div>
+
+  <div id="bottom-area">
+    <div id="action-row">
+      <button class="abtn" id="btn-sail"   onclick="sailToNearest()">⛵<br>הפלג</button>
+      <button class="abtn red"  id="btn-attack" onclick="forceAttack()" disabled>⚔️<br>תקוף!</button>
+      <button class="abtn grn"  id="btn-loot"   onclick="lootIsland()" disabled>💰<br>בזוז!</button>
+      <button class="abtn blue" id="btn-center"  onclick="centerOnShip()">🧭<br>מיקום</button>
+    </div>
+    <div id="bottom-row2">
+      <button class="sbtn" onclick="openUpg()">🔧 שדרוגים</button>
+      <button class="sbtn" onclick="fullRepair()">🩹 תיקון (50💰)</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE PANEL -->
+<div id="upg-overlay" onclick="closeUpg()"></div>
+<div id="upg-panel">
+  <div class="upg-hdr">
+    <h2>🔧 שדרוגים</h2>
+    <button class="ucls" onclick="closeUpg()">✕</button>
+  </div>
+  <div class="gold-bar">💰 זהב: <strong id="panel-gold">60</strong></div>
+  <div class="usec">🚢 ספינה</div>
+  <div class="ugrid">
+    <div class="ucard" id="card-hull"   onclick="upgrade('hull')">  <span class="ulvl" id="hull-lvl">1</span>  <span class="uname">🛡️ גוף ספינה</span>  <span class="ucost" id="hull-cost">80💰</span></div>
+    <div class="ucard" id="card-speed"  onclick="upgrade('speed')"> <span class="ulvl" id="speed-lvl">1</span> <span class="uname">💨 מפרשים</span>      <span class="ucost" id="speed-cost">60💰</span></div>
+    <div class="ucard" id="card-repair" onclick="upgrade('repair')"><span class="ulvl" id="repair-lvl">1</span><span class="uname">💊 ריפוי אוטו'</span><span class="ucost" id="repair-cost">100💰</span></div>
+    <div class="ucard" id="card-armor"  onclick="upgrade('armor')"> <span class="ulvl" id="armor-lvl">1</span> <span class="uname">🔩 שריון</span>       <span class="ucost" id="armor-cost">110💰</span></div>
+  </div>
+  <div class="usec">💣 תותחים</div>
+  <div class="ugrid">
+    <div class="ucard" id="card-damage" onclick="upgrade('damage')"><span class="ulvl" id="damage-lvl">1</span><span class="uname">💥 נזק</span>        <span class="ucost" id="damage-cost">70💰</span></div>
+    <div class="ucard" id="card-range"  onclick="upgrade('range')"> <span class="ulvl" id="range-lvl">1</span> <span class="uname">🎯 טווח</span>       <span class="ucost" id="range-cost">90💰</span></div>
+    <div class="ucard" id="card-reload" onclick="upgrade('reload')"><span class="ulvl" id="reload-lvl">1</span><span class="uname">⚡ טעינה</span>      <span class="ucost" id="reload-cost">80💰</span></div>
+    <div class="ucard" id="card-multi"  onclick="upgrade('multi')"> <span class="ulvl" id="multi-lvl">1</span> <span class="uname">🎆 ריבוי כדורים</span><span class="ucost" id="multi-cost">120💰</span></div>
+  </div>
+  <button class="rfull" id="rfull-btn" onclick="fullRepair()">🔧 תיקון מלא — 50💰</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  BOSS DEFINITIONS
+// ══════════════════════════════════════════
+const BOSSES = [
+  {
+    name:'הקרקן הקטן', emoji:'🦑',
+    desc:'יצור הים הצעיר — מהיר ותוקפני. יורה מטחים כפולים ומשתולל!',
+    warn:'⚠️ שים לב: הקרקן מאיץ ככל שנחלש!',
+    color:'#4B0082', hullColor:'#3a0060',
+    hp:700, spd:1.1, dmg:20, range:220, reload:1300, size:1.7, loot:250,
+    phases:[
+      {name:'מלא כוח',  hpPct:1.0, reloadMult:1.0, pattern:'single', speedMult:1.0, color:'#4B0082'},
+      {name:'זועם!',    hpPct:0.6, reloadMult:0.7, pattern:'double', speedMult:1.35, color:'#8B0000'},
+      {name:'אגוני!',   hpPct:0.25,reloadMult:0.5, pattern:'triple', speedMult:1.7,  color:'#e74c3c'},
+    ],
+    minionsAt: null, healAt: null,
+  },
+  {
+    name:'הפריגטה המקוללת', emoji:'⚓',
+    desc:'ספינת מלחמה שחזרה מהמתים. יורה מטחי מניפה ומרפאת עצמה!',
+    warn:'⚠️ הפריגטה מרפאת ב-50% חיים. תהרוג אותה מהר!',
+    color:'#5a0050', hullColor:'#420040',
+    hp:1400, spd:0.85, dmg:32, range:280, reload:1500, size:2.0, loot:500,
+    phases:[
+      {name:'שלמה',     hpPct:1.0, reloadMult:1.0, pattern:'spread3', speedMult:1.0, color:'#5a0050'},
+      {name:'שבורה',    hpPct:0.65,reloadMult:0.7, pattern:'burst5',  speedMult:1.2, color:'#8B0060'},
+      {name:'גוועת',    hpPct:0.3, reloadMult:0.45,pattern:'ring',    speedMult:1.45,color:'#e74c3c'},
+    ],
+    minionsAt: null, healAt: 0.5,
+  },
+  {
+    name:'דרקון הים', emoji:'🐉',
+    desc:'אגדת הימים הקדמונים. פולט אש לכל כיוון ומזמן מחזקים!',
+    warn:'⚠️ ב-50% חיים מזמן מחזקים! ב-15% נהיה בלתי נשלט!',
+    color:'#006040', hullColor:'#004a30',
+    hp:2200, spd:1.0, dmg:48, range:320, reload:1100, size:2.3, loot:900,
+    phases:[
+      {name:'מנמנם',      hpPct:1.0, reloadMult:1.0, pattern:'spread3', speedMult:0.85,color:'#006040'},
+      {name:'ניעור',      hpPct:0.7, reloadMult:0.75,pattern:'burst5',  speedMult:1.1, color:'#008050'},
+      {name:'זועם',       hpPct:0.4, reloadMult:0.55,pattern:'ring',    speedMult:1.3, color:'#00a060'},
+      {name:'נחוש למות',  hpPct:0.15,reloadMult:0.35,pattern:'chaos8',  speedMult:1.6, color:'#e74c3c'},
+    ],
+    minionsAt: 0.5, healAt: null,
+  },
+  {
+    name:'מלך הפיראטים', emoji:'👑',
+    desc:'המלך הסופי של הים. 4 שלבים. מרפא. מזמן חיילים. אי אפשר לברוח!',
+    warn:'⚠️ המלך שליט בים כולו. רק הגיבור הגדול ביותר יכול לנצח!',
+    color:'#1a1a70', hullColor:'#0a0a50',
+    hp:3500, spd:0.9, dmg:62, range:360, reload:950, size:2.6, loot:1500,
+    phases:[
+      {name:'המלך שולט',    hpPct:1.0, reloadMult:1.0, pattern:'double',  speedMult:0.9, color:'#1a1a70'},
+      {name:'המלך כועס',    hpPct:0.75,reloadMult:0.8, pattern:'burst5',  speedMult:1.1, color:'#3a00aa'},
+      {name:'המלך שבור',    hpPct:0.5, reloadMult:0.6, pattern:'ring',    speedMult:1.25,color:'#8B0000'},
+      {name:'בלתי ניצח!',   hpPct:0.25,reloadMult:0.38,pattern:'chaos8',  speedMult:1.5, color:'#e74c3c'},
+    ],
+    minionsAt: 0.5, healAt: 0.65,
+  },
+];
+
+// which level index (0-based) triggers which boss
+const BOSS_AT_LEVEL = {4:0, 6:1, 8:2, 9:3};
+
+// ══════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════
+const WORLD = 4000;
+
+const ISLAND_TYPES = [
+  {name:'אי קטן',       color:'#2d8a2d',size:40, defense:35,  loot:[22,55],   diff:1, emoji:'🌴'},
+  {name:'נמל קטן',      color:'#3a9a3a',size:50, defense:75,  loot:[50,100],  diff:2, emoji:'⚓'},
+  {name:'מבצר הים',     color:'#1a6a1a',size:65, defense:160, loot:[110,210], diff:3, emoji:'🏰'},
+  {name:'אי האוצרות',   color:'#228b22',size:74, defense:290, loot:[190,360], diff:4, emoji:'💎'},
+  {name:'עיר פיראטים',  color:'#145214',size:86, defense:460, loot:[310,620], diff:5, emoji:'☠️'},
+];
+
+const ENEMY_TYPES = [
+  {name:'סירת סיור',  hpM:.6,  dmgM:.7,  spdM:1.3, rngM:.8,  relM:1.3, lotM:.7,  color:'#8B2020',size:.7},
+  {name:'פריגטה',     hpM:1.0, dmgM:1.0, spdM:1.0, rngM:1.0, relM:1.0, lotM:1.0, color:'#6B1010',size:.9},
+  {name:'ספינת קרב',  hpM:1.6, dmgM:1.4, spdM:.85, rngM:1.2, relM:.8,  lotM:1.6, color:'#5a0a0a',size:1.1},
+];
+
+const LEVELS = [
+  {num:1, name:'ים הצפון',       isl:6,  ene:0, diff:[0,1],   bonus:0,   bg:['#0a1e3c','#050e1e']},
+  {num:2, name:'מפרץ הסוחרים',  isl:7,  ene:2, diff:[0,1,2], bonus:40,  bg:['#0d1e38','#060f1c']},
+  {num:3, name:'שנתות הדרקון',   isl:8,  ene:3, diff:[1,2],   bonus:60,  bg:['#0a1830','#040c18']},
+  {num:4, name:'ים הסערה',       isl:9,  ene:5, diff:[1,2,3], bonus:80,  bg:['#0c1428','#060a14']},
+  {num:5, name:'מצר הקרקן',      isl:5,  ene:3, diff:[2,3],   bonus:150, bg:['#100820','#060410']}, // boss level
+  {num:6, name:'ים הסכנה',       isl:10, ene:7, diff:[2,3,4], bonus:120, bg:['#0a0e1e','#040610']},
+  {num:7, name:'שדות המוקשים',   isl:6,  ene:5, diff:[3,4],   bonus:160, bg:['#08101a','#030608']}, // boss level
+  {num:8, name:'פס הגולגולות',    isl:12, ene:9, diff:[3,4,4], bonus:180, bg:['#060c14','#020408']},
+  {num:9, name:'ים הדם',         isl:6,  ene:6, diff:[3,4,4], bonus:200, bg:['#0a0608','#040204']}, // boss level
+  {num:10,name:'הים האחרון',     isl:4,  ene:4, diff:[4,4,4], bonus:0,   bg:['#040408','#020204']}, // final boss
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+const G = {
+  gold:60, totalGold:0,
+  hp:100, maxHp:100,
+  speed:1.0, damage:25, range:230, reload:1500,
+  armor:0, multiShot:1,
+  levels:{hull:1,speed:1,repair:1,armor:1,damage:1,range:1,reload:1,multi:1},
+  costs:{hull:80,speed:60,repair:100,armor:110,damage:70,range:90,reload:80,multi:120},
+  phase:'ocean', // ocean / sailing / battle / looting / boss / dead
+  currentLevel:0,
+  selectedIsland:null,
+  bossRef:null, // active boss enemy ref
+  bossPhaseIdx:0,
+  bossHealUsed:false,
+  bossMinionsSpawned:false,
+  shipX:WORLD/2, shipY:WORLD*.82,
+  targetX:0, targetY:0, shipAngle:0,
+  lastShot:0,
+  islands:[], enemyShips:[], projectiles:[], particles:[],
+  camX:WORLD/2, camY:WORLD*.82,
+  time:0,
+  isDragging:false, dragStartX:0, dragStartY:0, camStartX:0, camStartY:0,
+  abilityActive:false, abilityCooldown:0, abilityMaxCooldown:600,
+  lvlGold:0, lvlIslands:0, lvlShips:0,
+  totalIslands:0, totalShips:0,
+  running:false,
+};
+
+const canvas   = document.getElementById('gameCanvas');
+const ctx      = canvas.getContext('2d');
+const mmCanvas = document.getElementById('minimapCanvas');
+const mmCtx    = mmCanvas.getContext('2d');
+
+// ══════════════════════════════════════════
+//  RESIZE & CAMERA
+// ══════════════════════════════════════════
+function resizeCanvas(){
+  const m=document.getElementById('main');
+  canvas.width=m.offsetWidth; canvas.height=m.offsetHeight;
+  mmCanvas.width=80; mmCanvas.height=80;
+  clampCam();
+}
+function clampCam(){
+  const hw=canvas.width/2, hh=canvas.height/2;
+  G.camX=Math.max(hw,Math.min(WORLD-hw,G.camX));
+  G.camY=Math.max(hh,Math.min(WORLD-hh,G.camY));
+}
+function w2s(wx,wy){return [wx-G.camX+canvas.width/2, wy-G.camY+canvas.height/2];}
+function s2w(sx,sy){return [sx-canvas.width/2+G.camX, sy-canvas.height/2+G.camY];}
+
+// ══════════════════════════════════════════
+//  LEVEL GENERATION
+// ══════════════════════════════════════════
+function generateLevel(idx){
+  const cfg=LEVELS[idx];
+  G.islands=[]; G.enemyShips=[]; G.projectiles=[]; G.particles=[];
+  G.phase='ocean'; G.selectedIsland=null;
+  G.bossRef=null; G.bossPhaseIdx=0; G.bossHealUsed=false; G.bossMinionsSpawned=false;
+  G.lvlGold=0; G.lvlIslands=0; G.lvlShips=0;
+
+  const margin=180;
+  for(let i=0;i<cfg.isl;i++){
+    const di=cfg.diff[Math.floor(Math.random()*cfg.diff.length)];
+    const t=ISLAND_TYPES[di];
+    let x,y,tr=0;
+    do{x=margin+Math.random()*(WORLD-margin*2);y=margin+Math.random()*(WORLD-margin*2);tr++;}
+    while(tr<100&&G.islands.some(s=>Math.hypot(s.x-x,s.y-y)<140));
+    G.islands.push({...t,x,y,id:i,conquered:false,currentDefense:t.defense,animOffset:Math.random()*Math.PI*2});
+  }
+
+  const baseHp=50+idx*18, baseDmg=8+idx*3, baseSpd=.7+idx*.08, baseRange=190+idx*12, baseReload=2400-idx*120;
+  const baseLoot=[30+idx*15,70+idx*30];
+  for(let i=0;i<cfg.ene;i++){
+    let ti=idx<2?0:idx<4?Math.random()<.5?0:1:Math.floor(Math.random()*Math.min(idx-1,3));
+    ti=Math.min(ti,2);
+    spawnEnemy(ENEMY_TYPES[ti],baseHp,baseDmg,baseSpd,baseRange,baseReload,baseLoot);
+  }
+
+  G.shipX=WORLD/2+(Math.random()-.5)*300;
+  G.shipY=WORLD*.84;
+  G.camX=G.shipX; G.camY=G.shipY;
+  clampCam(); updateRemain();
+  document.getElementById('boss-hud').style.display='none';
+}
+
+function spawnEnemy(et,bHp,bDmg,bSpd,bRange,bReload,bLoot,isBoss=false){
+  let ex,ey,tr=0;
+  do{ex=150+Math.random()*(WORLD-300);ey=150+Math.random()*(WORLD-300);tr++;}
+  while(tr<60&&Math.hypot(ex-G.shipX,ey-G.shipY)<500);
+  G.enemyShips.push({
+    x:ex,y:ey,angle:Math.random()*Math.PI*2,
+    hp:Math.ceil(bHp*et.hpM),maxHp:Math.ceil(bHp*et.hpM),
+    dmg:bDmg*et.dmgM, speed:bSpd*et.spdM,
+    range:bRange*et.rngM, reload:Math.max(500,bReload*et.relM),
+    loot:[Math.ceil(bLoot[0]*et.lotM),Math.ceil(bLoot[1]*et.lotM)],
+    lastShot:0, state:'patrol', patrolA:Math.random()*Math.PI*2,
+    color:et.color, size:et.size||1.0, name:et.name||'אויב',
+    isBoss,
+    id:Math.random(),
+  });
+}
+
+// ══════════════════════════════════════════
+//  BOSS SYSTEM
+// ══════════════════════════════════════════
+function showBossIntro(){
+  const bossIdx=BOSS_AT_LEVEL[G.currentLevel];
+  const b=BOSSES[bossIdx];
+  document.getElementById('boss-intro-skull').textContent=b.emoji;
+  document.getElementById('boss-intro-name').textContent=b.name;
+  document.getElementById('boss-intro-desc').textContent=b.desc;
+  document.getElementById('boss-intro-hp').textContent=b.hp;
+  document.getElementById('boss-intro-phases').textContent=b.phases.length;
+  document.getElementById('boss-intro-loot').textContent=b.loot+'💰';
+  document.getElementById('boss-intro-warn').textContent=b.warn;
+  G.running=false;
+  document.getElementById('screen-boss-intro').classList.remove('hidden');
+}
+
+function startBossFight(){
+  document.getElementById('screen-boss-intro').classList.add('hidden');
+  const bossIdx=BOSS_AT_LEVEL[G.currentLevel];
+  const b=BOSSES[bossIdx];
+
+  // Spawn boss at top of world
+  const bx=WORLD/2+(Math.random()-.5)*400, by=300;
+  const boss={
+    x:bx, y:by, angle:Math.PI,
+    hp:b.hp, maxHp:b.hp,
+    dmg:b.dmg, speed:b.spd,
+    range:b.range, reload:b.reload,
+    loot:[b.loot,b.loot],
+    lastShot:0, state:'chase', patrolA:0,
+    color:b.hullColor, size:b.size, name:b.name,
+    isBoss:true, bossIdx,
+    id:Math.random(),
+  };
+  G.bossRef=boss;
+  G.bossPhaseIdx=0;
+  G.bossHealUsed=false;
+  G.bossMinionsSpawned=false;
+  G.enemyShips.push(boss);
+
+  // Show boss HUD
+  document.getElementById('boss-hud').style.display='block';
+  document.getElementById('boss-hud-name').textContent=b.name+' '+b.emoji;
+  updateBossHUD();
+
+  G.running=true;
+  G.phase='boss';
+  addLog(`☠️ ${b.name} הגיע! הלחם! ${b.emoji}`);
+  flashScreen('rgba(200,0,0,.25)');
+  setBossMusic(true);
+  gameLoop();
+}
+
+function updateBossHUD(){
+  const boss=G.bossRef;
+  if(!boss||!G.enemyShips.includes(boss)){
+    document.getElementById('boss-hud').style.display='none';
+    return;
+  }
+  const b=BOSSES[boss.bossIdx];
+  const pct=boss.hp/boss.maxHp;
+  document.getElementById('boss-hp-fill').style.width=(pct*100)+'%';
+  document.getElementById('boss-hp-fill').style.background=
+    pct>.5?'linear-gradient(90deg,#8B0000,#e74c3c,#f39c12)':
+    pct>.25?'linear-gradient(90deg,#700,#c0392b,#e67e22)':
+    'linear-gradient(90deg,#500,#e74c3c,#ff4444)';
+  document.getElementById('boss-hp-text').textContent=`${Math.ceil(boss.hp)} / ${boss.maxHp}`;
+  const phase=b.phases[G.bossPhaseIdx];
+  document.getElementById('boss-phase-tag').textContent=phase.name;
+  document.getElementById('boss-phase-text').textContent=`שלב ${G.bossPhaseIdx+1}/${b.phases.length}`;
+}
+
+function updateBossPhase(){
+  const boss=G.bossRef;
+  if(!boss) return;
+  const b=BOSSES[boss.bossIdx];
+  const pct=boss.hp/boss.maxHp;
+
+  // Find current phase
+  let newPhaseIdx=0;
+  for(let i=b.phases.length-1;i>=0;i--){
+    if(pct<=b.phases[i].hpPct){newPhaseIdx=i;break;}
+  }
+  if(newPhaseIdx>G.bossPhaseIdx){
+    G.bossPhaseIdx=newPhaseIdx;
+    const phase=b.phases[newPhaseIdx];
+    boss.color=phase.color;
+    addLog(`⚡ ${boss.name} — ${phase.name}!`);
+    flashScreen('rgba(255,50,0,.3)');
+    // Spawn explosion effect
+    for(let i=0;i<3;i++) setTimeout(()=>spawnExplosion(boss.x+(Math.random()-.5)*60,boss.y+(Math.random()-.5)*40,true),i*200);
+  }
+
+  // Heal event
+  if(b.healAt && pct<=b.healAt && !G.bossHealUsed){
+    G.bossHealUsed=true;
+    boss.hp=Math.min(boss.maxHp, boss.hp+boss.maxHp*0.3);
+    addLog(`💊 ${boss.name} התחדש! +30% חיים!`);
+    flashScreen('rgba(0,200,50,.2)');
+    for(let i=0;i<20;i++) G.particles.push({
+      x:boss.x,y:boss.y,
+      vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,
+      life:.9+Math.random()*.4,size:4+Math.random()*6,
+      color:['#2ecc71','#27ae60','#aaffaa'][Math.floor(Math.random()*3)]
+    });
+  }
+
+  // Minion spawn
+  if(b.minionsAt && pct<=b.minionsAt && !G.bossMinionsSpawned){
+    G.bossMinionsSpawned=true;
+    for(let i=0;i<3;i++){
+      const et=ENEMY_TYPES[1]; // frigates
+      const idx=G.currentLevel;
+      const hp=50+idx*18, dmg=8+idx*3, spd=.7+idx*.08, rng=190+idx*12, rel=2400-idx*120;
+      const ex=boss.x+(Math.random()-.5)*200, ey=boss.y+(Math.random()-.5)*200;
+      spawnEnemyAt(et,hp,dmg,spd,rng,rel,[30+idx*15,70+idx*30],ex,ey);
+    }
+    addLog(`⚠️ ${boss.name} שלח מחזקים!`);
+    flashScreen('rgba(200,0,0,.2)');
+  }
+
+  updateBossHUD();
+}
+
+function spawnEnemyAt(et,bHp,bDmg,bSpd,bRange,bReload,bLoot,ex,ey){
+  G.enemyShips.push({
+    x:ex,y:ey,angle:Math.random()*Math.PI*2,
+    hp:Math.ceil(bHp*et.hpM),maxHp:Math.ceil(bHp*et.hpM),
+    dmg:bDmg*et.dmgM,speed:bSpd*et.spdM,
+    range:bRange*et.rngM,reload:Math.max(500,bReload*et.relM),
+    loot:[Math.ceil(bLoot[0]*et.lotM),Math.ceil(bLoot[1]*et.lotM)],
+    lastShot:0,state:'chase',patrolA:Math.random()*Math.PI*2,
+    color:et.color,size:et.size||1.0,name:et.name||'אויב',
+    isBoss:false,id:Math.random(),
+  });
+  document.getElementById('stat-enemies').textContent=G.enemyShips.length;
+}
+
+// ══════════════════════════════════════════
+//  DRAWING
+// ══════════════════════════════════════════
+function drawOcean(cfg){
+  const g=ctx.createLinearGradient(0,0,0,canvas.height);
+  g.addColorStop(0,cfg.bg[0]); g.addColorStop(1,cfg.bg[1]);
+  ctx.fillStyle=g; ctx.fillRect(0,0,canvas.width,canvas.height);
+  const [bx1,by1]=w2s(0,0),[bx2,by2]=w2s(WORLD,WORLD);
+  ctx.strokeStyle='rgba(240,192,64,.07)'; ctx.lineWidth=3;
+  ctx.strokeRect(bx1,by1,bx2-bx1,by2-by1);
+  ctx.strokeStyle='rgba(255,255,255,.035)'; ctx.lineWidth=1;
+  for(let i=0;i<8;i++){
+    const wy=((G.time*.18+i*100)%WORLD)-G.camY+canvas.height/2;
+    if(wy<-20||wy>canvas.height+20) continue;
+    ctx.beginPath();
+    for(let x=0;x<canvas.width;x+=6){
+      const wyx=wy+Math.sin((x+G.camX)*.014+G.time*.025+i)*10;
+      x===0?ctx.moveTo(x,wyx):ctx.lineTo(x,wyx);
+    }
+    ctx.stroke();
+  }
+}
+
+function drawIsland(isl){
+  const [sx,sy]=w2s(isl.x,isl.y);
+  if(sx<-isl.size*2||sx>canvas.width+isl.size*2||sy<-isl.size*2||sy>canvas.height+isl.size*2)return;
+  const bob=Math.sin(G.time*.02+isl.animOffset)*2, r=isl.size;
+  ctx.save();
+  ctx.fillStyle='rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(sx+6,sy+bob+r*.3+6,r*.82,r*.17,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#c4a35a'; ctx.beginPath(); ctx.ellipse(sx,sy+bob,r*.9,r*.43,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=isl.conquered?'#666':isl.color; ctx.beginPath(); ctx.arc(sx,sy+bob-r*.13,r*.7,0,Math.PI*2); ctx.fill();
+  if(!isl.conquered){
+    const tc=Math.floor(r/22);
+    for(let t=0;t<tc;t++){
+      const tx=sx+Math.cos(t*2.4+isl.animOffset)*r*.33, ty=sy+bob-r*.13+Math.sin(t*2.4+isl.animOffset)*r*.17;
+      ctx.fillStyle='#5C2800'; ctx.fillRect(tx-2,ty-13,3,13);
+      ctx.fillStyle='#1a6a1a'; ctx.beginPath(); ctx.arc(tx,ty-15,9,0,Math.PI*2); ctx.fill();
+    }
+  } else {
+    ctx.fillStyle='#333'; ctx.fillRect(sx-1,sy+bob-r*.7-18,3,20);
+    ctx.fillStyle='#111'; ctx.fillRect(sx+1,sy+bob-r*.7-18,13,10);
+    ctx.fillStyle='#eee'; ctx.font='9px serif'; ctx.fillText('☠',sx+2,sy+bob-r*.7-9);
+  }
+  ctx.font=`${Math.floor(r*.38)}px serif`; ctx.textAlign='center';
+  ctx.fillText(isl.emoji,sx,sy+bob-r*.62);
+  ctx.fillStyle=isl.conquered?'rgba(120,120,120,.7)':'rgba(255,215,80,.95)';
+  ctx.font=`bold ${Math.max(9,Math.floor(r*.17))}px 'IM Fell English',serif`;
+  ctx.fillText(isl.name,sx,sy+bob+r*.57+13);
+  if(!isl.conquered&&isl.currentDefense<isl.defense){
+    const bw=r*1.1,bx=sx-bw/2,by=sy+bob+r*.62+16;
+    ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(bx,by,bw,5);
+    const p=isl.currentDefense/isl.defense;
+    ctx.fillStyle=p>.6?'#c0392b':p>.3?'#e67e22':'#f1c40f';
+    ctx.fillRect(bx,by,bw*p,5);
+  }
+  if(G.selectedIsland===isl){
+    ctx.strokeStyle='rgba(240,192,64,.65)'; ctx.lineWidth=2.5;
+    ctx.setLineDash([5,4]); ctx.beginPath(); ctx.arc(sx,sy+bob,r+13,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+  }
+  ctx.restore(); ctx.textAlign='left';
+}
+
+function drawPlayerShip(wx,wy,angle){
+  const [sx,sy]=w2s(wx,wy);
+  ctx.save(); ctx.translate(sx,sy); ctx.rotate(angle);
+  const lvl=G.levels.hull, sc=.78+lvl*.06;
+  ctx.scale(sc,sc);
+  if(G.abilityActive){ctx.shadowColor='rgba(155,89,182,.9)';ctx.shadowBlur=25;}
+  ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(4,18,27,9,0,0,Math.PI*2); ctx.fill();
+  const hc=G.abilityActive?'#4B0082':lvl>=4?'#8B0000':lvl>=3?'#5C1010':lvl>=2?'#6B3010':'#8B4513';
+  ctx.fillStyle=hc;
+  ctx.beginPath(); ctx.moveTo(-28,0); ctx.quadraticCurveTo(-33,14,0,19); ctx.quadraticCurveTo(33,14,28,0); ctx.lineTo(18,-7); ctx.lineTo(-18,-7); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#000'; ctx.fillRect(-26,0,52,3);
+  const cc=Math.min(G.levels.damage+G.multiShot,7);
+  ctx.fillStyle='#222';
+  for(let i=0;i<cc;i++){const cx=-18+i*(36/Math.max(cc-1,1));ctx.beginPath();ctx.arc(cx,3,3.5,0,Math.PI*2);ctx.fill();}
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#5C3010'; ctx.fillRect(-2.5,-57,5,57);
+  ctx.fillStyle=G.abilityActive?'rgba(200,150,255,.92)':'rgba(245,245,220,.9)';
+  ctx.beginPath(); ctx.moveTo(0,-55); ctx.quadraticCurveTo(27+Math.sin(G.time*.05)*5,-33,2,-11); ctx.lineTo(-2,-11); ctx.quadraticCurveTo(-27+Math.sin(G.time*.05)*3,-33,0,-55); ctx.fill();
+  ctx.fillStyle='#000'; ctx.fillRect(0,-70,13,9); ctx.fillStyle='#eee'; ctx.font='8px serif'; ctx.fillText('☠',1,-62);
+  ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(240,192,64,.06)'; ctx.lineWidth=1/sc;
+  ctx.beginPath(); ctx.arc(0,0,G.range/sc,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+  ctx.restore();
+}
+
+function drawEnemyShip(es){
+  const [sx,sy]=w2s(es.x,es.y);
+  if(sx<-130||sx>canvas.width+130||sy<-130||sy>canvas.height+130)return;
+  ctx.save(); ctx.translate(sx,sy); ctx.rotate(es.angle);
+  const sc=es.size*(0.72+G.currentLevel*.01);
+  ctx.scale(sc,sc);
+
+  // Boss glow
+  if(es.isBoss){
+    const b=BOSSES[es.bossIdx];
+    const phase=b.phases[G.bossPhaseIdx];
+    ctx.shadowColor=phase.color; ctx.shadowBlur=28;
+  }
+
+  ctx.fillStyle='rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(5,17,26,8,0,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle=es.color||'#6B1010';
+  ctx.beginPath(); ctx.moveTo(-26,0); ctx.quadraticCurveTo(-30,13,0,17); ctx.quadraticCurveTo(30,13,26,0); ctx.lineTo(16,-6); ctx.lineTo(-16,-6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.4)'; ctx.fillRect(-24,0,48,3);
+
+  const cc=Math.min(Math.ceil((es.dmg||10)/6),6);
+  ctx.fillStyle='#500';
+  for(let i=0;i<cc;i++){const cx=-14+i*(28/Math.max(cc-1,1));ctx.beginPath();ctx.arc(cx,3,3,0,Math.PI*2);ctx.fill();}
+
+  ctx.fillStyle='#3a0000'; ctx.fillRect(-2,-52,4,52);
+  ctx.fillStyle=es.isBoss?'rgba(200,0,180,.85)':'rgba(180,40,40,.85)';
+  ctx.beginPath(); ctx.moveTo(0,-50); ctx.quadraticCurveTo(23,-30,2,-10); ctx.lineTo(-2,-10); ctx.quadraticCurveTo(-23,-30,0,-50); ctx.fill();
+  ctx.fillStyle='#200'; ctx.fillRect(0,-63,12,8);
+  ctx.fillStyle=es.isBoss?'#ffaaff':'#c00'; ctx.font='8px serif'; ctx.fillText('☠',1,-56);
+  ctx.shadowBlur=0;
+  ctx.restore();
+
+  // HP bar
+  const hw=44*sc,bx=sx-hw/2,by=sy-34*sc-6;
+  ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(bx,by,hw,4);
+  const p=es.hp/es.maxHp;
+  ctx.fillStyle=p>.5?'#c0392b':p>.25?'#e67e22':'#f1c40f';
+  ctx.fillRect(bx,by,hw*p,4);
+
+  if(es.isBoss){
+    ctx.fillStyle='rgba(255,150,255,.9)'; ctx.font='bold 10px serif'; ctx.textAlign='center';
+    ctx.fillText('👑 BOSS',sx,by-6); ctx.textAlign='left';
+  }
+}
+
+function drawProjectile(p){
+  const [sx,sy]=w2s(p.x,p.y);
+  ctx.save();
+  ctx.fillStyle=p.enemy?'#c0392b':'#555';
+  ctx.shadowColor=p.enemy?'rgba(255,50,50,.9)':'rgba(255,120,0,.9)'; ctx.shadowBlur=8;
+  ctx.beginPath(); ctx.arc(sx,sy,p.big?6:4,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawParticle(p){
+  const [sx,sy]=w2s(p.x,p.y);
+  ctx.save(); ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
+  ctx.beginPath(); ctx.arc(sx,sy,p.size*p.life,0,Math.PI*2); ctx.fill(); ctx.restore();
+}
+
+function drawMinimap(){
+  const W=80,H=80,sc=W/WORLD;
+  mmCtx.fillStyle='rgba(4,12,24,.92)'; mmCtx.fillRect(0,0,W,H);
+  for(const isl of G.islands){
+    mmCtx.fillStyle=isl.conquered?'#555':isl.color;
+    mmCtx.beginPath(); mmCtx.arc(isl.x*sc,isl.y*sc,Math.max(2,isl.size*sc*.55),0,Math.PI*2); mmCtx.fill();
+  }
+  for(const es of G.enemyShips){
+    mmCtx.fillStyle=es.isBoss?'#ff80ff':'#c0392b';
+    mmCtx.beginPath(); mmCtx.arc(es.x*sc,es.y*sc,es.isBoss?5:2.5,0,Math.PI*2); mmCtx.fill();
+  }
+  mmCtx.fillStyle='#f0c040'; mmCtx.beginPath(); mmCtx.arc(G.shipX*sc,G.shipY*sc,3.5,0,Math.PI*2); mmCtx.fill();
+  mmCtx.strokeStyle='rgba(240,192,64,.3)'; mmCtx.lineWidth=1;
+  const vx=(G.camX-canvas.width/2)*sc,vy=(G.camY-canvas.height/2)*sc;
+  mmCtx.strokeRect(vx,vy,canvas.width*sc,canvas.height*sc);
+}
+
+// ══════════════════════════════════════════
+//  GAME LOOP
+// ══════════════════════════════════════════
+let lastAutoShot=0;
+function gameLoop(){
+  if(!G.running)return;
+  G.time++;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cfg=LEVELS[G.currentLevel];
+  drawOcean(cfg);
+  for(const isl of G.islands) drawIsland(isl);
+  for(const es of G.enemyShips) drawEnemyShip(es);
+
+  // Move player
+  if(G.phase==='sailing'||G.phase==='battle'){
+    const dx=G.targetX-G.shipX,dy=G.targetY-G.shipY,d=Math.hypot(dx,dy);
+    const spd=G.speed*(G.abilityActive?2.0:1.0)*2.0;
+    if(d>5){G.shipAngle=Math.atan2(dx,-dy);G.shipX+=dx/d*spd;G.shipY+=dy/d*spd;}
+    if(G.phase==='battle'&&G.selectedIsland){
+      autoFireIsland(G.selectedIsland,Math.hypot(G.selectedIsland.x-G.shipX,G.selectedIsland.y-G.shipY));
+    }
+    G.camX+=(G.shipX-G.camX)*.08;G.camY+=(G.shipY-G.camY)*.08;clampCam();
+  }
+
+  // Auto-attack nearby enemies always
+  autoAttackNearby();
+  updateEnemies();
+
+  // Projectiles
+  G.projectiles=G.projectiles.filter(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.life--;
+    if(p.life<=0){
+      if(p.tIsland)hitIsland(p.tIsland);
+      if(p.tEnemy){hitEnemy(p.tEnemy);}
+      if(p.hitPlayer)damagePlayer(p.dmg);
+      spawnExplosion(p.x,p.y,p.big);
+    }
+    return p.life>0;
+  });
+  G.particles=G.particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=.93;p.vy*=.93;p.life-=.03;return p.life>0;});
+  for(const p of G.particles) drawParticle(p);
+  for(const p of G.projectiles) drawProjectile(p);
+  drawPlayerShip(G.shipX,G.shipY,G.shipAngle);
+  drawMinimap();
+
+  // Auto-repair
+  if(G.levels.repair>1&&G.hp<G.maxHp&&G.phase!=='battle'&&G.time%55===0){
+    G.hp=Math.min(G.maxHp,G.hp+G.levels.repair*.9);updateHpBar();
+  }
+
+  // Ability cooldown
+  if(G.abilityCooldown>0){
+    G.abilityCooldown--;
+    if(G.abilityCooldown===300)G.abilityActive=false;
+    if(G.abilityCooldown===0)document.getElementById('btn-ability').classList.remove('cooldown');
+    const s=Math.ceil(G.abilityCooldown/60);
+    document.getElementById('ability-timer').textContent=s>0?s+'s':'';
+  }
+
+  // Island defeated?
+  if(G.selectedIsland&&G.selectedIsland.currentDefense<=0&&G.phase==='battle'){
+    G.phase='looting';
+    document.getElementById('btn-loot').disabled=false;
+    document.getElementById('btn-attack').disabled=true;
+    addLog('🏳️ האי נכנע! לחץ בזוז!');
+  }
+
+  // All islands done?
+  const allConq=G.islands.length>0&&G.islands.every(i=>i.conquered);
+  const hasBoss=G.currentLevel in BOSS_AT_LEVEL;
+
+  if(allConq&&G.phase!=='boss'&&G.phase!=='level-complete'&&G.phase!=='dead'){
+    if(hasBoss&&!G.bossRef){
+      // Trigger boss
+      G.running=false;
+      setTimeout(showBossIntro,600);
+    } else if(!hasBoss||(G.bossRef&&!G.enemyShips.includes(G.bossRef))){
+      G.phase='level-complete';
+      setTimeout(showLevelComplete,700);
+    }
+  }
+
+  // Boss phase - if boss dead but was boss level
+  if(G.phase==='boss'&&G.bossRef&&!G.enemyShips.includes(G.bossRef)&&allConq){
+    G.phase='level-complete';
+    setTimeout(showLevelComplete,700);
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ══════════════════════════════════════════
+//  ENEMY AI
+// ══════════════════════════════════════════
+function updateEnemies(){
+  for(const es of G.enemyShips){
+    const dtp=Math.hypot(es.x-G.shipX,es.y-G.shipY);
+
+    if(es.isBoss){
+      // Boss always chases
+      const b=BOSSES[es.bossIdx];
+      const phase=b.phases[G.bossPhaseIdx];
+      const spd=es.speed*phase.speedMult;
+      const dx=G.shipX-es.x,dy=G.shipY-es.y,d=Math.hypot(dx,dy);
+      if(d>10){es.angle=Math.atan2(dx,-dy);es.x+=dx/d*spd;es.y+=dy/d*spd;}
+      if(dtp<es.range){
+        const now=Date.now();
+        const effectiveReload=es.reload*phase.reloadMult;
+        if(now-es.lastShot>effectiveReload){
+          es.lastShot=now;
+          bossFire(es,phase.pattern);
+        }
+      }
+      updateBossPhase();
+    } else {
+      if(dtp<es.range*1.4)es.state='chase';
+      else if(dtp>es.range*3)es.state='patrol';
+      if(dtp<es.range)es.state='attack';
+      if(es.state==='patrol'){
+        if(Math.random()<.015)es.patrolA+=(Math.random()-.5)*1.2;
+        es.x+=Math.sin(es.patrolA)*es.speed*.55;
+        es.y-=Math.cos(es.patrolA)*es.speed*.55;
+        es.angle=es.patrolA;
+      } else {
+        const dx=G.shipX-es.x,dy=G.shipY-es.y,d=Math.hypot(dx,dy);
+        if(d>8){es.angle=Math.atan2(dx,-dy);const spd=es.state==='chase'?es.speed:es.speed*.25;es.x+=dx/d*spd;es.y+=dy/d*spd;}
+        if(es.state==='attack'){
+          const now=Date.now();
+          if(now-es.lastShot>es.reload){es.lastShot=now;fireEnemyAt(es);}
+        }
+      }
+    }
+    es.x=Math.max(80,Math.min(WORLD-80,es.x));
+    es.y=Math.max(80,Math.min(WORLD-80,es.y));
+  }
+}
+
+function bossFire(boss, pattern){
+  const dx=G.shipX-boss.x, dy=G.shipY-boss.y, d=Math.hypot(dx,dy);
+  const spd=5.5, baseAngle=Math.atan2(dy,dx);
+
+  const shots={
+    single:[[0]],
+    double:[[-.2],[.2]],
+    triple:[[-.35],[0],[.35]],
+    spread3:[[-.5],[-.15],[.15],[.5]],
+    burst5:[[-.6],[-.3],[0],[.3],[.6]],
+    ring: Array.from({length:8},(_,i)=>[i*Math.PI*2/8]),
+    chaos8: Array.from({length:8},()=>[Math.random()*Math.PI*2-Math.PI]),
+  }[pattern] || [[0]];
+
+  shots.forEach(([offset],i)=>{
+    setTimeout(()=>{
+      const a=baseAngle+offset;
+      G.projectiles.push({
+        x:boss.x,y:boss.y,
+        vx:Math.cos(a)*spd+(Math.random()-.5)*1.5,
+        vy:Math.sin(a)*spd+(Math.random()-.5)*1.5,
+        life:Math.ceil(d/spd)+12,
+        enemy:true,hitPlayer:true,dmg:boss.dmg,big:true,
+      });
+    },i*120);
+  });
+}
+
+function fireEnemyAt(es){
+  const dx=G.shipX-es.x,dy=G.shipY-es.y,d=Math.hypot(dx,dy);
+  const spd=5.5;
+  G.projectiles.push({x:es.x,y:es.y,vx:dx/d*spd+(Math.random()-.5)*2,vy:dy/d*spd+(Math.random()-.5)*2,life:Math.ceil(d/spd)+8,enemy:true,hitPlayer:true,dmg:es.dmg,big:false});
+}
+
+// ══════════════════════════════════════════
+//  COMBAT
+// ══════════════════════════════════════════
+function autoAttackNearby(){
+  if(!G.enemyShips.length)return;
+  const now=Date.now();
+  const rl=G.abilityActive?G.reload/3:G.reload;
+  if(now-lastAutoShot<rl*.8)return;
+  for(const es of G.enemyShips){
+    if(Math.hypot(es.x-G.shipX,es.y-G.shipY)<G.range){
+      lastAutoShot=now;
+      const shots=G.multiShot+(G.abilityActive?2:0);
+      for(let s=0;s<shots;s++) fireAtEnemy(es,s*60);
+      break;
+    }
+  }
+}
+
+function autoFireIsland(isl,dist){
+  if(dist>G.range)return;
+  const now=Date.now();
+  const rl=G.abilityActive?G.reload/3:G.reload;
+  if(now-G.lastShot<rl)return;
+  G.lastShot=now;
+  const dx=isl.x-G.shipX,dy=isl.y-G.shipY;
+  const spd=5.5+G.levels.reload*.5,frames=dist/spd;
+  const shots=G.multiShot+(G.abilityActive?2:0);
+  for(let c=0;c<shots;c++){
+    setTimeout(()=>{
+      G.projectiles.push({x:G.shipX+(Math.random()-.5)*18,y:G.shipY+(Math.random()-.5)*8,vx:dx/frames+(Math.random()-.5)*2,vy:dy/frames+(Math.random()-.5)*2,life:Math.ceil(frames)+6,tIsland:isl,enemy:false});
+    },c*80);
+  }
+}
+
+function fireAtEnemy(es,delay=0){
+  setTimeout(()=>{
+    const dx=es.x-G.shipX,dy=es.y-G.shipY,d=Math.hypot(dx,dy);
+    G.projectiles.push({x:G.shipX,y:G.shipY,vx:dx/d*6+(Math.random()-.5)*2,vy:dy/d*6+(Math.random()-.5)*2,life:Math.ceil(d/6)+6,tEnemy:es,enemy:false});
+  },delay);
+}
+
+function hitIsland(isl){
+  if(isl.currentDefense<=0)return;
+  isl.currentDefense=Math.max(0,isl.currentDefense-G.damage*(.8+Math.random()*.4));
+  sfxCannon();
+  if(Math.random()<.28&&isl.currentDefense>0)damagePlayer(isl.diff*2.5*(.5+Math.random()));
+}
+
+function hitEnemy(es){
+  if(!G.enemyShips.includes(es))return;
+  es.hp=Math.max(0,es.hp-G.damage*(.9+Math.random()*.3));
+  if(es.isBoss) updateBossPhase();
+  if(es.hp<=0){
+    G.enemyShips=G.enemyShips.filter(e=>e!==es);
+    const loot=es.loot[0]+Math.floor(Math.random()*(es.loot[1]-es.loot[0]));
+    G.gold+=loot;G.totalGold+=loot;G.lvlGold+=loot;G.lvlShips++;G.totalShips++;
+    spawnExplosion(es.x,es.y,true);spawnExplosion(es.x+25,es.y-15,false);
+    sfxExplosion();
+    if(es.isBoss){
+      addLog(`👑 ${es.name} הושמד! +${loot} זהב! 🎉`);
+      flashScreen('rgba(200,0,255,.4)');
+      document.getElementById('boss-hud').style.display='none';
+      G.bossRef=null;
+      setBossMusic(false);
+      sfxVictory();
+    } else {
+      addLog(`🚢 ${es.name} הושמדה! +${loot} זהב!`);
+      flashScreen();
+    }
+    updateUI();
+    document.getElementById('stat-enemies').textContent=G.enemyShips.length;
+  }
+}
+
+function damagePlayer(raw){
+  const dmg=raw*(1-G.armor/100);
+  G.hp=Math.max(0,G.hp-dmg);updateHpBar();
+  if(G.hp<=0)showGameOver();
+}
+
+function spawnExplosion(wx,wy,big=false){
+  const n=big?18:10;
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,s=(big?1.5:1)*(1+Math.random()*3);
+    G.particles.push({x:wx,y:wy,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.7+Math.random()*.5,size:(big?5:3)+Math.random()*5,color:['#f1c40f','#e67e22','#e74c3c','#fff','#f0c040'][Math.floor(Math.random()*5)]});
+  }
+}
+
+// ══════════════════════════════════════════
+//  PLAYER ACTIONS
+// ══════════════════════════════════════════
+function sailToTarget(isl){
+  if(G.phase==='battle'||G.phase==='looting')return;
+  G.selectedIsland=isl;G.phase='sailing';
+  const dx=G.shipX-isl.x,dy=G.shipY-isl.y,d=Math.hypot(dx,dy);
+  G.targetX=isl.x+(dx/d)*(G.range*.8);G.targetY=isl.y+(dy/d)*(G.range*.8);
+  document.getElementById('btn-attack').disabled=false;
+  document.getElementById('btn-loot').disabled=true;
+  addLog(`⛵ מפליג ל${isl.name}...`);
+  setTimeout(()=>{if(G.phase==='sailing'&&G.selectedIsland===isl){G.phase='battle';G.lastShot=0;addLog(`💣 יורה על ${isl.name}!`);}},Math.max(400,d/2.2));
+}
+
+function sailToNearest(){
+  if(G.phase==='battle'||G.phase==='looting')return;
+  if(!G.islands.some(i=>!i.conquered)){addLog('כל האיים נכבשו! 🏆');return;}
+  let best=null,bd=Infinity;
+  for(const isl of G.islands){if(isl.conquered)continue;const d=Math.hypot(isl.x-G.shipX,isl.y-G.shipY);if(d<bd){bd=d;best=isl;}}
+  if(best)sailToTarget(best);
+}
+
+function forceAttack(){if(!G.selectedIsland)return;G.phase='battle';G.lastShot=0;addLog('⚔️ תוקף!');}
+
+function lootIsland(){
+  if(G.phase!=='looting'||!G.selectedIsland)return;
+  const isl=G.selectedIsland;
+  const loot=isl.loot[0]+Math.floor(Math.random()*(isl.loot[1]-isl.loot[0]));
+  G.gold+=loot;G.totalGold+=loot;G.lvlGold+=loot;G.lvlIslands++;G.totalIslands++;
+  isl.conquered=true;
+  addLog(`🏴‍☠️ ${isl.name} נכבש! +${loot} זהב!`);
+  flashScreen();sfxCoin();G.selectedIsland=null;
+  G.phase=(G.bossRef)?'boss':'ocean';
+  document.getElementById('btn-attack').disabled=true;
+  document.getElementById('btn-loot').disabled=true;
+  updateUI();updateRemain();
+}
+
+function fullRepair(){
+  if(G.gold<50){addLog('❌ צריך 50 זהב!');return;}
+  G.gold-=50;G.hp=G.maxHp;updateHpBar();addLog('🔧 ספינה תוקנה!');updateUI();closeUpg();
+}
+
+function centerOnShip(){G.camX=G.shipX;G.camY=G.shipY;clampCam();addLog('🧭 ממורכז על הספינה');}
+
+function useAbility(){
+  if(G.abilityCooldown>0)return;
+  G.abilityActive=true;G.abilityCooldown=G.abilityMaxCooldown;
+  document.getElementById('btn-ability').classList.add('cooldown');
+  addLog('💜 יכולת מיוחדת! מהירות וירי מוגברים!');
+  flashScreen('rgba(155,89,182,.2)');
+}
+
+// ══════════════════════════════════════════
+//  UPGRADES
+// ══════════════════════════════════════════
+const UPG={
+  hull:  {label:'גוף ספינה',apply:()=>{G.maxHp+=35;G.hp=Math.min(G.hp+35,G.maxHp);updateHpBar();}},
+  speed: {label:'מפרשים',   apply:()=>{G.speed+=.22;}},
+  repair:{label:'ריפוי',    apply:()=>{}},
+  armor: {label:'שריון',    apply:()=>{G.armor=Math.min(60,G.armor+8);}},
+  damage:{label:'נזק',      apply:()=>{G.damage+=13;}},
+  range: {label:'טווח',     apply:()=>{G.range+=42;}},
+  reload:{label:'טעינה',    apply:()=>{G.reload=Math.max(300,G.reload-190);}},
+  multi: {label:'ריבוי',    apply:()=>{G.multiShot=Math.min(5,G.multiShot+1);}},
+};
+
+function upgrade(type){
+  const cost=G.costs[type];
+  if(G.gold<cost){addLog(`❌ צריך ${cost} זהב!`);return;}
+  G.gold-=cost;G.levels[type]++;G.costs[type]=Math.floor(cost*1.55);
+  UPG[type].apply();
+  addLog(`✅ ${UPG[type].label} → רמה ${G.levels[type]}!`);
+  flashScreen('rgba(0,255,100,.1)');updateUI();
+}
+
+// ══════════════════════════════════════════
+//  UI
+// ══════════════════════════════════════════
+function updateUI(){
+  document.getElementById('stat-gold').textContent=G.gold;
+  document.getElementById('panel-gold').textContent=G.gold;
+  document.getElementById('stat-hp').textContent=`${Math.ceil(G.hp)}/${G.maxHp}`;
+  document.getElementById('stat-enemies').textContent=G.enemyShips.length;
+  updateHpBar();
+  for(const t of Object.keys(UPG)){
+    const le=document.getElementById(`${t}-lvl`);if(le)le.textContent=G.levels[t];
+    const ce=document.getElementById(`${t}-cost`);if(ce)ce.textContent=G.costs[t]+'💰';
+    const card=document.getElementById(`card-${t}`);if(card)card.classList.toggle('dis',G.gold<G.costs[t]);
+  }
+  const rb=document.getElementById('rfull-btn');if(rb)rb.disabled=G.gold<50;
+}
+function updateHpBar(){
+  const pct=(G.hp/G.maxHp*100).toFixed(1);
+  const bar=document.getElementById('hp-bar');
+  bar.style.width=pct+'%';
+  bar.style.background=G.hp/G.maxHp>.6?'linear-gradient(90deg,#2ecc71,#27ae60)':G.hp/G.maxHp>.3?'linear-gradient(90deg,#f39c12,#e67e22)':'linear-gradient(90deg,#e74c3c,#c0392b)';
+}
+function updateRemain(){document.getElementById('stat-remain').textContent=G.islands.filter(i=>!i.conquered).length;}
+function addLog(msg){const log=document.getElementById('log');log.innerHTML='';const el=document.createElement('div');el.className='log-entry';el.textContent=msg;log.appendChild(el);}
+function flashScreen(color='rgba(240,192,64,.15)'){const f=document.getElementById('flash');f.style.background=color;f.style.opacity='1';setTimeout(()=>f.style.opacity='0',180);}
+function openUpg(){updateUI();document.getElementById('upg-panel').classList.add('open');document.getElementById('upg-overlay').classList.add('show');}
+function closeUpg(){document.getElementById('upg-panel').classList.remove('open');document.getElementById('upg-overlay').classList.remove('show');}
+
+// ══════════════════════════════════════════
+//  SCREENS
+// ══════════════════════════════════════════
+function showLevelComplete(){
+  G.running=false;
+  setBossMusic(false);
+  sfxVictory();
+  const cfg=LEVELS[G.currentLevel];
+  document.getElementById('lc-sub').textContent=`שלב ${cfg.num}: ${cfg.name}`;
+  document.getElementById('lc-gold').textContent=G.lvlGold;
+  document.getElementById('lc-isl').textContent=G.lvlIslands;
+  document.getElementById('lc-ships').textContent=G.lvlShips;
+  document.getElementById('lc-hp').textContent=Math.ceil(G.hp);
+  const bonus=cfg.bonus;
+  if(bonus>0){G.gold+=bonus;G.totalGold+=bonus;document.getElementById('lc-bonus').textContent=`🎁 בונוס שלב: +${bonus} זהב!`;}
+  else document.getElementById('lc-bonus').textContent='';
+  document.getElementById('screen-level').classList.remove('hidden');
+}
+
+function nextLevel(){
+  G.currentLevel++;
+  if(G.currentLevel>=LEVELS.length){showWin();return;}
+  document.getElementById('screen-level').classList.add('hidden');
+  const cfg=LEVELS[G.currentLevel];
+  document.getElementById('level-badge').textContent=`שלב ${cfg.num}`;
+  G.hp=Math.min(G.maxHp,G.hp+G.maxHp*.35);updateHpBar();
+  generateLevel(G.currentLevel);
+  updateUI();updateRemain();
+  G.running=true;
+  const hasBoss=G.currentLevel in BOSS_AT_LEVEL;
+  addLog(`⚓ שלב ${cfg.num}: ${cfg.name}!${hasBoss?' ☠️ יש בוס!':cfg.ene>0?` ⚠️ ${cfg.ene} אויבים`:''}`)
+  gameLoop();
+}
+
+function showGameOver(){
+  G.running=false;G.phase='dead';
+  document.getElementById('go-isl').textContent=G.totalIslands;
+  document.getElementById('go-lvl').textContent=G.currentLevel+1;
+  document.getElementById('go-gold').textContent=G.totalGold;
+  document.getElementById('go-ships').textContent=G.totalShips;
+  document.getElementById('screen-gameover').classList.remove('hidden');
+}
+
+function showWin(){
+  document.getElementById('screen-level').classList.add('hidden');
+  document.getElementById('win-gold').textContent=G.totalGold;
+  document.getElementById('win-isl').textContent=G.totalIslands;
+  document.getElementById('win-ships').textContent=G.totalShips;
+  document.getElementById('win-lvl').textContent=10;
+  document.getElementById('screen-win').classList.remove('hidden');
+}
+
+// ══════════════════════════════════════════
+//  TOUCH / PAN
+// ══════════════════════════════════════════
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(e.touches.length>=2){G.isDragging=false;return;}
+  const t=e.touches[0];G.isDragging=true;G.dragStartX=t.clientX;G.dragStartY=t.clientY;G.camStartX=G.camX;G.camStartY=G.camY;
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(!G.isDragging||e.touches.length>=2)return;
+  const t=e.touches[0];G.camX=G.camStartX-(t.clientX-G.dragStartX);G.camY=G.camStartY-(t.clientY-G.dragStartY);clampCam();
+},{passive:false});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();if(!G.isDragging)return;
+  const t=e.changedTouches[0];const moved=Math.hypot(t.clientX-G.dragStartX,t.clientY-G.dragStartY);
+  G.isDragging=false;if(moved<12)handleTap(t.clientX,t.clientY);
+},{passive:false});
+canvas.addEventListener('mousedown',e=>{G.isDragging=true;G.dragStartX=e.clientX;G.dragStartY=e.clientY;G.camStartX=G.camX;G.camStartY=G.camY;});
+canvas.addEventListener('mousemove',e=>{if(!G.isDragging)return;G.camX=G.camStartX-(e.clientX-G.dragStartX);G.camY=G.camStartY-(e.clientY-G.dragStartY);clampCam();});
+canvas.addEventListener('mouseup',e=>{const m=Math.hypot(e.clientX-G.dragStartX,e.clientY-G.dragStartY);G.isDragging=false;if(m<8)handleTap(e.clientX,e.clientY);});
+
+function handleTap(cx,cy){
+  const rect=canvas.getBoundingClientRect();
+  const sx=(cx-rect.left)*(canvas.width/rect.width), sy=(cy-rect.top)*(canvas.height/rect.height);
+  const [wx,wy]=s2w(sx,sy);
+  // Tap enemy (boss gets bigger hitbox)
+  for(const es of G.enemyShips){
+    const hitR=es.isBoss?70:40;
+    if(Math.hypot(es.x-wx,es.y-wy)<hitR){
+      for(let s=0;s<G.multiShot+1;s++) fireAtEnemy(es,s*60);
+      addLog(es.isBoss?`🎯 מכה את ${es.name}!`:`🎯 יורה על ${es.name}!`);return;
+    }
+  }
+  // Tap island
+  for(const isl of G.islands){
+    if(!isl.conquered&&Math.hypot(isl.x-wx,isl.y-wy)<isl.size+32){
+      if(G.phase==='battle'||G.phase==='looting'){addLog('סיים את הקרב תחילה');return;}
+      sailToTarget(isl);return;
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+//  MUSIC ENGINE (Web Audio API)
+// ══════════════════════════════════════════
+const MUS = {
+  ctx: null, muted: false,
+  masterGain: null, reverbGain: null,
+  seqInterval: null, beatIdx: 0,
+  bossMode: false,
+};
+
+function initAudio(){
+  if(MUS.ctx) return;
+  MUS.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  MUS.masterGain = MUS.ctx.createGain();
+  MUS.masterGain.gain.value = 0.55;
+  MUS.masterGain.connect(MUS.ctx.destination);
+
+  // Simple reverb via convolver with generated impulse
+  try{
+    const conv = MUS.ctx.createConvolver();
+    const sr = MUS.ctx.sampleRate, len = sr*1.5;
+    const ir = MUS.ctx.createBuffer(2, len, sr);
+    for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);}
+    conv.buffer = ir;
+    MUS.reverbGain = MUS.ctx.createGain();
+    MUS.reverbGain.gain.value = 0.22;
+    MUS.masterGain.connect(conv);
+    conv.connect(MUS.reverbGain);
+    MUS.reverbGain.connect(MUS.ctx.destination);
+  }catch(e){}
+}
+
+// Play a single note
+function playNote(freq, dur, type='triangle', vol=0.18, startDelay=0){
+  if(!MUS.ctx || MUS.muted) return;
+  const t = MUS.ctx.currentTime + startDelay;
+  const osc = MUS.ctx.createOscillator();
+  const gain = MUS.ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t);
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(vol, t + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  osc.connect(gain);
+  gain.connect(MUS.masterGain);
+  osc.start(t);
+  osc.stop(t + dur + 0.05);
+}
+
+// Play percussion (noise burst)
+function playDrum(type, startDelay=0){
+  if(!MUS.ctx || MUS.muted) return;
+  const t = MUS.ctx.currentTime + startDelay;
+  const buf = MUS.ctx.createBuffer(1, MUS.ctx.sampleRate*0.2, MUS.ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0;i<data.length;i++) data[i] = Math.random()*2-1;
+  const src = MUS.ctx.createBufferSource();
+  src.buffer = buf;
+  const gain = MUS.ctx.createGain();
+  const filter = MUS.ctx.createBiquadFilter();
+  if(type==='kick'){
+    filter.type='lowpass'; filter.frequency.value=120;
+    gain.gain.setValueAtTime(0.9,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+    // pitch sweep for kick
+    const osc = MUS.ctx.createOscillator();
+    const og = MUS.ctx.createGain();
+    osc.frequency.setValueAtTime(180,t); osc.frequency.exponentialRampToValueAtTime(40,t+0.15);
+    og.gain.setValueAtTime(0.8,t); og.gain.exponentialRampToValueAtTime(0.001,t+0.18);
+    osc.connect(og); og.connect(MUS.masterGain);
+    osc.start(t); osc.stop(t+0.2);
+  } else if(type==='snare'){
+    filter.type='highpass'; filter.frequency.value=1800;
+    gain.gain.setValueAtTime(0.4,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+  } else { // hihat
+    filter.type='highpass'; filter.frequency.value=8000;
+    gain.gain.setValueAtTime(0.15,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+  }
+  src.connect(filter); filter.connect(gain); gain.connect(MUS.masterGain);
+  src.start(t); src.stop(t+0.22);
+}
+
+// ── MELODY & HARMONY ──
+// Pirate-flavored D minor / harmonic minor scale
+const NOTE = {
+  D3:146.8, E3:164.8, F3:174.6, G3:196.0, A3:220.0, Bb3:233.1, Cs4:277.2,
+  D4:293.7, E4:329.6, F4:349.2, G4:392.0, A4:440.0, Bb4:466.2, Cs5:554.4,
+  D5:587.3,
+};
+
+// Main theme — 16-beat repeating melody
+const MELODY = [
+  // bar 1
+  {n:NOTE.D4,  d:0.4}, {n:NOTE.F4,  d:0.2}, {n:NOTE.G4,  d:0.4}, {n:NOTE.A4,  d:0.4},
+  // bar 2
+  {n:NOTE.Bb4, d:0.4}, {n:NOTE.A4,  d:0.2}, {n:NOTE.G4,  d:0.2}, {n:NOTE.F4,  d:0.6},
+  // bar 3
+  {n:NOTE.E4,  d:0.4}, {n:NOTE.Cs4, d:0.2}, {n:NOTE.D4,  d:0.4}, {n:NOTE.E4,  d:0.4},
+  // bar 4
+  {n:NOTE.F4,  d:0.4}, {n:NOTE.G4,  d:0.4}, {n:NOTE.A4,  d:0.4}, {n:NOTE.D5,  d:0.8},
+];
+
+// Bass line
+const BASS = [
+  {n:NOTE.D3,  d:0.8}, {n:NOTE.F3,  d:0.8},
+  {n:NOTE.G3,  d:0.8}, {n:NOTE.A3,  d:0.8},
+  {n:NOTE.Bb3, d:0.8}, {n:NOTE.G3,  d:0.8},
+  {n:NOTE.Cs4, d:0.8}, {n:NOTE.D4,  d:0.8},
+];
+
+// Boss theme — more intense, faster minor
+const BOSS_MELODY = [
+  {n:NOTE.D4, d:0.2},{n:NOTE.Cs4,d:0.2},{n:NOTE.D4, d:0.2},{n:NOTE.E4, d:0.2},
+  {n:NOTE.F4, d:0.3},{n:NOTE.G4, d:0.2},{n:NOTE.F4, d:0.2},{n:NOTE.E4, d:0.3},
+  {n:NOTE.Cs4,d:0.2},{n:NOTE.D4, d:0.2},{n:NOTE.Bb3,d:0.3},{n:NOTE.A3, d:0.3},
+  {n:NOTE.G3, d:0.2},{n:NOTE.A3, d:0.2},{n:NOTE.Cs4,d:0.2},{n:NOTE.D4, d:0.6},
+];
+
+let melIdx=0, bassIdx=0, bossIdx=0;
+let melTime=0, bassTime=0, bossTime=0;
+let beatCount=0;
+
+function scheduleMeasure(){
+  if(!MUS.ctx || MUS.muted) return;
+  const now = MUS.ctx.currentTime;
+
+  if(MUS.bossMode){
+    // Boss: fast intense melody + drums every beat
+    for(let i=0;i<4;i++){
+      const note = BOSS_MELODY[bossIdx % BOSS_MELODY.length];
+      playNote(note.n, note.d*0.9, 'sawtooth', 0.14, bossTime);
+      playNote(note.n/2, note.d, 'triangle', 0.1, bossTime); // octave bass
+      if(i%2===0) playDrum('kick', bossTime);
+      else playDrum('snare', bossTime);
+      playDrum('hihat', bossTime + note.d/2);
+      bossTime += note.d;
+      bossIdx++;
+    }
+  } else {
+    // Normal: pirate melody + bass + drums
+    // Melody — 4 notes per schedule
+    for(let i=0;i<4;i++){
+      const note = MELODY[melIdx % MELODY.length];
+      playNote(note.n, note.d*0.85, 'triangle', 0.16, melTime);
+      // Add harmony (third above) on strong beats
+      if(melIdx%4===0) playNote(note.n*1.25, note.d*.7, 'sine', 0.07, melTime);
+      melTime += note.d;
+      melIdx++;
+    }
+    // Bass — 2 notes per schedule
+    for(let i=0;i<2;i++){
+      const note = BASS[bassIdx % BASS.length];
+      playNote(note.n, note.d*0.9, 'sawtooth', 0.12, bassTime);
+      bassTime += note.d;
+      bassIdx++;
+    }
+    // Drums every beat (~0.4s)
+    for(let i=0;i<4;i++){
+      const bt = now + i*0.4;
+      playDrum('kick', i*0.4);
+      if(i%2===1) playDrum('snare', i*0.4);
+      playDrum('hihat', i*0.4 + 0.2);
+    }
+  }
+
+  beatCount++;
+}
+
+function startMusic(){
+  initAudio();
+  if(MUS.seqInterval) return;
+  melTime = bassTime = bossTime = MUS.ctx.currentTime;
+  melIdx = bassIdx = bossIdx = 0;
+  beatCount = 0;
+  // Schedule ahead every 1.5s
+  scheduleMeasure();
+  MUS.seqInterval = setInterval(()=>{
+    if(!MUS.muted) scheduleMeasure();
+  }, 1400);
+}
+
+function stopMusic(){
+  if(MUS.seqInterval){ clearInterval(MUS.seqInterval); MUS.seqInterval=null; }
+}
+
+function setBossMusic(on){
+  MUS.bossMode = on;
+  bossIdx = 0;
+  bossTime = MUS.ctx ? MUS.ctx.currentTime : 0;
+}
+
+function toggleMute(){
+  MUS.muted = !MUS.muted;
+  if(MUS.masterGain) MUS.masterGain.gain.value = MUS.muted ? 0 : 0.55;
+  document.getElementById('btn-mute').textContent = MUS.muted ? '🔇' : '🔊';
+}
+
+// Sound effects
+function sfxCannon(){
+  if(!MUS.ctx||MUS.muted)return;
+  const t=MUS.ctx.currentTime;
+  const buf=MUS.ctx.createBuffer(1,MUS.ctx.sampleRate*.08,MUS.ctx.sampleRate);
+  const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  const src=MUS.ctx.createBufferSource(); src.buffer=buf;
+  const gain=MUS.ctx.createGain(); const flt=MUS.ctx.createBiquadFilter();
+  flt.type='bandpass'; flt.frequency.value=600; flt.Q.value=0.5;
+  gain.gain.setValueAtTime(.5,t); gain.gain.exponentialRampToValueAtTime(.001,t+.08);
+  src.connect(flt); flt.connect(gain); gain.connect(MUS.masterGain);
+  src.start(t); src.stop(t+.1);
+}
+
+function sfxExplosion(){
+  if(!MUS.ctx||MUS.muted)return;
+  const t=MUS.ctx.currentTime;
+  const buf=MUS.ctx.createBuffer(1,MUS.ctx.sampleRate*.35,MUS.ctx.sampleRate);
+  const d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);
+  const src=MUS.ctx.createBufferSource(); src.buffer=buf;
+  const gain=MUS.ctx.createGain(); const flt=MUS.ctx.createBiquadFilter();
+  flt.type='lowpass'; flt.frequency.value=300;
+  gain.gain.setValueAtTime(.7,t); gain.gain.exponentialRampToValueAtTime(.001,t+.35);
+  src.connect(flt); flt.connect(gain); gain.connect(MUS.masterGain);
+  src.start(t); src.stop(t+.4);
+}
+
+function sfxCoin(){
+  if(!MUS.ctx||MUS.muted)return;
+  [1047,1319,1568].forEach((f,i)=>playNote(f,.18,'sine',.2,i*.07));
+}
+
+function sfxVictory(){
+  if(!MUS.ctx||MUS.muted)return;
+  [NOTE.D4,NOTE.F4,NOTE.A4,NOTE.D5].forEach((f,i)=>playNote(f,.4,'triangle',.25,i*.15));
+}
+
+// ══════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════
+function startGame(){
+  document.getElementById('screen-intro').classList.add('hidden');
+  resizeCanvas();
+  document.getElementById('level-badge').textContent='שלב 1';
+  generateLevel(0);updateUI();updateRemain();
+  G.running=true;
+  addLog('⚓ שלב 1: ים הצפון! גע על אי לתקוף!');
+  startMusic();
+  gameLoop();
+}
+
+window.addEventListener('resize',resizeCanvas);
+</script>
+</body>
+</html>
