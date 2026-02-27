@@ -400,6 +400,7 @@ const G = {
   camX:WORLD/2, camY:WORLD*.82,
   time:0,
   isDragging:false, dragStartX:0, dragStartY:0, camStartX:0, camStartY:0,
+  zoom:1.0, minZoom:0.35, maxZoom:2.5,
   abilityActive:false, abilityCooldown:0, abilityMaxCooldown:600,
   lvlGold:0, lvlIslands:0, lvlShips:0,
   totalIslands:0, totalShips:0,
@@ -420,13 +421,7 @@ function resizeCanvas(){
   mmCanvas.width=80; mmCanvas.height=80;
   clampCam();
 }
-function clampCam(){
-  const hw=canvas.width/2, hh=canvas.height/2;
-  G.camX=Math.max(hw,Math.min(WORLD-hw,G.camX));
-  G.camY=Math.max(hh,Math.min(WORLD-hh,G.camY));
-}
-function w2s(wx,wy){return [wx-G.camX+canvas.width/2, wy-G.camY+canvas.height/2];}
-function s2w(sx,sy){return [sx-canvas.width/2+G.camX, sy-canvas.height/2+G.camY];}
+// w2s, s2w, clampCam defined later with zoom support
 
 // ══════════════════════════════════════════
 //  LEVEL GENERATION
@@ -1198,26 +1193,120 @@ function showWin(){
 }
 
 // ══════════════════════════════════════════
-//  TOUCH / PAN
+//  TOUCH / PAN / PINCH-ZOOM
 // ══════════════════════════════════════════
-canvas.addEventListener('touchstart',e=>{
+// Zoom state
+G.zoom = 1.0;          // current zoom level
+G.minZoom = 0.4;       // zoom out max
+G.maxZoom = 2.5;       // zoom in max
+let pinchStartDist = 0;
+let pinchStartZoom = 1;
+let pinchMidX = 0, pinchMidY = 0;
+let pinchCamStartX = 0, pinchCamStartY = 0;
+
+// Override w2s / s2w to respect zoom
+function w2s(wx,wy){
+  return [
+    (wx - G.camX) * G.zoom + canvas.width/2,
+    (wy - G.camY) * G.zoom + canvas.height/2
+  ];
+}
+function s2w(sx,sy){
+  return [
+    (sx - canvas.width/2) / G.zoom + G.camX,
+    (sy - canvas.height/2) / G.zoom + G.camY
+  ];
+}
+function clampCam(){
+  const hw = canvas.width  / (2 * G.zoom);
+  const hh = canvas.height / (2 * G.zoom);
+  G.camX = Math.max(hw, Math.min(WORLD - hw, G.camX));
+  G.camY = Math.max(hh, Math.min(WORLD - hh, G.camY));
+}
+
+canvas.addEventListener('touchstart', e=>{
   e.preventDefault();
-  if(e.touches.length>=2){G.isDragging=false;return;}
-  const t=e.touches[0];G.isDragging=true;G.dragStartX=t.clientX;G.dragStartY=t.clientY;G.camStartX=G.camX;G.camStartY=G.camY;
+  if(e.touches.length === 2){
+    // Begin pinch
+    G.isDragging = false;
+    const t0=e.touches[0], t1=e.touches[1];
+    pinchStartDist = Math.hypot(t1.clientX-t0.clientX, t1.clientY-t0.clientY);
+    pinchStartZoom = G.zoom;
+    pinchMidX = (t0.clientX + t1.clientX) / 2;
+    pinchMidY = (t0.clientY + t1.clientY) / 2;
+    // World point under pinch midpoint
+    const rect = canvas.getBoundingClientRect();
+    const sx = (pinchMidX - rect.left) * (canvas.width/rect.width);
+    const sy = (pinchMidY - rect.top)  * (canvas.height/rect.height);
+    [pinchCamStartX, pinchCamStartY] = s2w(sx, sy);
+  } else if(e.touches.length === 1){
+    const t=e.touches[0];
+    G.isDragging=true;
+    G.dragStartX=t.clientX; G.dragStartY=t.clientY;
+    G.camStartX=G.camX;     G.camStartY=G.camY;
+  }
 },{passive:false});
-canvas.addEventListener('touchmove',e=>{
+
+canvas.addEventListener('touchmove', e=>{
   e.preventDefault();
-  if(!G.isDragging||e.touches.length>=2)return;
-  const t=e.touches[0];G.camX=G.camStartX-(t.clientX-G.dragStartX);G.camY=G.camStartY-(t.clientY-G.dragStartY);clampCam();
+  if(e.touches.length === 2){
+    // Pinch zoom
+    const t0=e.touches[0], t1=e.touches[1];
+    const dist = Math.hypot(t1.clientX-t0.clientX, t1.clientY-t0.clientY);
+    const newZoom = Math.max(G.minZoom, Math.min(G.maxZoom, pinchStartZoom * dist / pinchStartDist));
+
+    // Zoom toward pinch midpoint: keep world point under fingers fixed
+    const rect = canvas.getBoundingClientRect();
+    const midX = (t0.clientX+t1.clientX)/2;
+    const midY = (t0.clientY+t1.clientY)/2;
+    const sx = (midX - rect.left) * (canvas.width/rect.width);
+    const sy = (midY - rect.top)  * (canvas.height/rect.height);
+
+    G.zoom = newZoom;
+    // Adjust camera so that pinchCamStart stays under midpoint
+    G.camX = pinchCamStartX - (sx - canvas.width/2)  / G.zoom;
+    G.camY = pinchCamStartY - (sy - canvas.height/2) / G.zoom;
+    clampCam();
+  } else if(e.touches.length === 1 && G.isDragging){
+    // Pan
+    const t=e.touches[0];
+    G.camX = G.camStartX - (t.clientX - G.dragStartX) / G.zoom;
+    G.camY = G.camStartY - (t.clientY - G.dragStartY) / G.zoom;
+    clampCam();
+  }
 },{passive:false});
-canvas.addEventListener('touchend',e=>{
-  e.preventDefault();if(!G.isDragging)return;
-  const t=e.changedTouches[0];const moved=Math.hypot(t.clientX-G.dragStartX,t.clientY-G.dragStartY);
-  G.isDragging=false;if(moved<12)handleTap(t.clientX,t.clientY);
+
+canvas.addEventListener('touchend', e=>{
+  e.preventDefault();
+  if(e.touches.length === 0 && G.isDragging){
+    const t=e.changedTouches[0];
+    const moved = Math.hypot(t.clientX-G.dragStartX, t.clientY-G.dragStartY);
+    G.isDragging = false;
+    if(moved < 12) handleTap(t.clientX, t.clientY);
+  } else if(e.touches.length === 1){
+    // Went from 2 fingers to 1 — restart pan from current position
+    G.isDragging = false;
+  }
 },{passive:false});
+
+// Mouse pan (desktop)
 canvas.addEventListener('mousedown',e=>{G.isDragging=true;G.dragStartX=e.clientX;G.dragStartY=e.clientY;G.camStartX=G.camX;G.camStartY=G.camY;});
-canvas.addEventListener('mousemove',e=>{if(!G.isDragging)return;G.camX=G.camStartX-(e.clientX-G.dragStartX);G.camY=G.camStartY-(e.clientY-G.dragStartY);clampCam();});
+canvas.addEventListener('mousemove',e=>{if(!G.isDragging)return;G.camX=G.camStartX-(e.clientX-G.dragStartX)/G.zoom;G.camY=G.camStartY-(e.clientY-G.dragStartY)/G.zoom;clampCam();});
 canvas.addEventListener('mouseup',e=>{const m=Math.hypot(e.clientX-G.dragStartX,e.clientY-G.dragStartY);G.isDragging=false;if(m<8)handleTap(e.clientX,e.clientY);});
+// Mouse wheel zoom (desktop)
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const factor = e.deltaY < 0 ? 1.12 : 0.89;
+  const newZoom = Math.max(G.minZoom, Math.min(G.maxZoom, G.zoom * factor));
+  const rect = canvas.getBoundingClientRect();
+  const sx = (e.clientX - rect.left) * (canvas.width/rect.width);
+  const sy = (e.clientY - rect.top)  * (canvas.height/rect.height);
+  const [wx,wy] = s2w(sx,sy);
+  G.zoom = newZoom;
+  G.camX = wx - (sx - canvas.width/2)  / G.zoom;
+  G.camY = wy - (sy - canvas.height/2) / G.zoom;
+  clampCam();
+},{passive:false});
 
 function handleTap(cx,cy){
   const rect=canvas.getBoundingClientRect();
