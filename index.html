@@ -73,7 +73,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'IM
 
 /* CANVAS */
 #main{flex:1;position:relative;overflow:hidden;min-height:0;}
-canvas{display:block;width:100%;height:100%;}
+/* canvas touch-action none prevents browser scroll/zoom interference on iOS Chrome */
+canvas{display:block;width:100%;height:100%;touch-action:none;}
 #flash{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .08s;}
 #minimap{position:absolute;bottom:90px;left:8px;width:80px;height:80px;border:1px solid rgba(240,192,64,.4);border-radius:5px;background:rgba(4,12,24,.88);overflow:hidden;}
 #minimap canvas{width:100%;height:100%;display:block;}
@@ -1224,89 +1225,115 @@ function clampCam(){
   G.camY = Math.max(hh, Math.min(WORLD - hh, G.camY));
 }
 
-canvas.addEventListener('touchstart', e=>{
-  e.preventDefault();
-  if(e.touches.length === 2){
-    // Begin pinch
+// ══════════════════════════════════════════
+//  INPUT: POINTER EVENTS (works on iOS Chrome, Safari, Android)
+//  touch-action:none on canvas handles scroll prevention
+// ══════════════════════════════════════════
+const pointers = new Map(); // pointerId → {x, y}
+
+function getCanvasXY(e){
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (canvas.width  / rect.width),
+    y: (e.clientY - rect.top)  * (canvas.height / rect.height),
+  };
+}
+
+canvas.addEventListener('pointerdown', e=>{
+  canvas.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
+
+  if(pointers.size === 1){
+    // Single finger — start pan
+    G.isDragging  = true;
+    G.dragStartX  = e.clientX;
+    G.dragStartY  = e.clientY;
+    G.camStartX   = G.camX;
+    G.camStartY   = G.camY;
+  } else if(pointers.size === 2){
+    // Second finger added — switch to pinch
     G.isDragging = false;
-    const t0=e.touches[0], t1=e.touches[1];
-    pinchStartDist = Math.hypot(t1.clientX-t0.clientX, t1.clientY-t0.clientY);
+    const pts = [...pointers.values()];
+    pinchStartDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
     pinchStartZoom = G.zoom;
-    pinchMidX = (t0.clientX + t1.clientX) / 2;
-    pinchMidY = (t0.clientY + t1.clientY) / 2;
-    // World point under pinch midpoint
+    const midClientX = (pts[0].x + pts[1].x) / 2;
+    const midClientY = (pts[0].y + pts[1].y) / 2;
     const rect = canvas.getBoundingClientRect();
-    const sx = (pinchMidX - rect.left) * (canvas.width/rect.width);
-    const sy = (pinchMidY - rect.top)  * (canvas.height/rect.height);
+    const sx = (midClientX - rect.left) * (canvas.width  / rect.width);
+    const sy = (midClientY - rect.top)  * (canvas.height / rect.height);
     [pinchCamStartX, pinchCamStartY] = s2w(sx, sy);
-  } else if(e.touches.length === 1){
-    const t=e.touches[0];
-    G.isDragging=true;
-    G.dragStartX=t.clientX; G.dragStartY=t.clientY;
-    G.camStartX=G.camX;     G.camStartY=G.camY;
   }
-},{passive:false});
+});
 
-canvas.addEventListener('touchmove', e=>{
-  e.preventDefault();
-  if(e.touches.length === 2){
+canvas.addEventListener('pointermove', e=>{
+  if(!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
+
+  if(pointers.size === 2){
     // Pinch zoom
-    const t0=e.touches[0], t1=e.touches[1];
-    const dist = Math.hypot(t1.clientX-t0.clientX, t1.clientY-t0.clientY);
-    const newZoom = Math.max(G.minZoom, Math.min(G.maxZoom, pinchStartZoom * dist / pinchStartDist));
+    const pts = [...pointers.values()];
+    const dist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+    G.zoom = Math.max(G.minZoom, Math.min(G.maxZoom, pinchStartZoom * dist / pinchStartDist));
 
-    // Zoom toward pinch midpoint: keep world point under fingers fixed
+    const midClientX = (pts[0].x + pts[1].x) / 2;
+    const midClientY = (pts[0].y + pts[1].y) / 2;
     const rect = canvas.getBoundingClientRect();
-    const midX = (t0.clientX+t1.clientX)/2;
-    const midY = (t0.clientY+t1.clientY)/2;
-    const sx = (midX - rect.left) * (canvas.width/rect.width);
-    const sy = (midY - rect.top)  * (canvas.height/rect.height);
-
-    G.zoom = newZoom;
-    // Adjust camera so that pinchCamStart stays under midpoint
+    const sx = (midClientX - rect.left) * (canvas.width  / rect.width);
+    const sy = (midClientY - rect.top)  * (canvas.height / rect.height);
     G.camX = pinchCamStartX - (sx - canvas.width/2)  / G.zoom;
     G.camY = pinchCamStartY - (sy - canvas.height/2) / G.zoom;
     clampCam();
-  } else if(e.touches.length === 1 && G.isDragging){
+  } else if(pointers.size === 1 && G.isDragging){
     // Pan
-    const t=e.touches[0];
-    G.camX = G.camStartX - (t.clientX - G.dragStartX) / G.zoom;
-    G.camY = G.camStartY - (t.clientY - G.dragStartY) / G.zoom;
+    G.camX = G.camStartX - (e.clientX - G.dragStartX) / G.zoom;
+    G.camY = G.camStartY - (e.clientY - G.dragStartY) / G.zoom;
     clampCam();
   }
-},{passive:false});
+});
 
-canvas.addEventListener('touchend', e=>{
-  e.preventDefault();
-  if(e.touches.length === 0 && G.isDragging){
-    const t=e.changedTouches[0];
-    const moved = Math.hypot(t.clientX-G.dragStartX, t.clientY-G.dragStartY);
+canvas.addEventListener('pointerup', e=>{
+  const wasSize = pointers.size;
+  const startX  = pointers.has(e.pointerId) ? G.dragStartX : null;
+  const startY  = pointers.has(e.pointerId) ? G.dragStartY : null;
+  pointers.delete(e.pointerId);
+
+  if(wasSize === 1 && G.isDragging){
+    // Single finger lifted — check if it was a tap
     G.isDragging = false;
-    if(moved < 12) handleTap(t.clientX, t.clientY);
-  } else if(e.touches.length === 1){
-    // Went from 2 fingers to 1 — restart pan from current position
+    const moved = Math.hypot(e.clientX - startX, e.clientY - startY);
+    if(moved < 14) handleTap(e.clientX, e.clientY);
+  } else if(wasSize === 2 && pointers.size === 1){
+    // One finger remains after pinch — restart pan from that finger
+    const rem = [...pointers.entries()][0];
+    G.isDragging = true;
+    G.dragStartX = rem[1].x;
+    G.dragStartY = rem[1].y;
+    G.camStartX  = G.camX;
+    G.camStartY  = G.camY;
+  } else {
     G.isDragging = false;
   }
-},{passive:false});
+});
 
-// Mouse pan (desktop)
-canvas.addEventListener('mousedown',e=>{G.isDragging=true;G.dragStartX=e.clientX;G.dragStartY=e.clientY;G.camStartX=G.camX;G.camStartY=G.camY;});
-canvas.addEventListener('mousemove',e=>{if(!G.isDragging)return;G.camX=G.camStartX-(e.clientX-G.dragStartX)/G.zoom;G.camY=G.camStartY-(e.clientY-G.dragStartY)/G.zoom;clampCam();});
-canvas.addEventListener('mouseup',e=>{const m=Math.hypot(e.clientX-G.dragStartX,e.clientY-G.dragStartY);G.isDragging=false;if(m<8)handleTap(e.clientX,e.clientY);});
+canvas.addEventListener('pointercancel', e=>{
+  pointers.delete(e.pointerId);
+  G.isDragging = false;
+});
+
 // Mouse wheel zoom (desktop)
-canvas.addEventListener('wheel',e=>{
+canvas.addEventListener('wheel', e=>{
   e.preventDefault();
   const factor = e.deltaY < 0 ? 1.12 : 0.89;
   const newZoom = Math.max(G.minZoom, Math.min(G.maxZoom, G.zoom * factor));
   const rect = canvas.getBoundingClientRect();
-  const sx = (e.clientX - rect.left) * (canvas.width/rect.width);
-  const sy = (e.clientY - rect.top)  * (canvas.height/rect.height);
-  const [wx,wy] = s2w(sx,sy);
+  const sx = (e.clientX - rect.left) * (canvas.width  / rect.width);
+  const sy = (e.clientY - rect.top)  * (canvas.height / rect.height);
+  const [wx, wy] = s2w(sx, sy);
   G.zoom = newZoom;
   G.camX = wx - (sx - canvas.width/2)  / G.zoom;
   G.camY = wy - (sy - canvas.height/2) / G.zoom;
   clampCam();
-},{passive:false});
+}, {passive: false});
 
 function handleTap(cx,cy){
   const rect=canvas.getBoundingClientRect();
